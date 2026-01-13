@@ -1,34 +1,33 @@
 
-# Pelada PFC Manager - Integrado com Google Sheets
+# Pelada PFC Manager - Guia de Produção (Vercel)
 
-Este projeto está configurado para ler e gravar dados diretamente na sua planilha Google via Google Apps Script.
+Este sistema foi projetado para ser 100% funcional tanto no computador quanto no celular, integrando estatísticas de futebol amador com o Google Sheets.
 
-## Configuração do Backend (Planilha)
+## Como fazer Deploy na Vercel
 
-1. Abra a sua planilha [ID: 1SCSIAF0lPHH9UShJF7x6k8w-CmHWiGyaxAeaVIvHxg4].
-2. Vá em **Extensões** > **Apps Script**.
-3. Apague qualquer código existente e cole o conteúdo do arquivo `google-apps-script.gs` disponível na raiz deste projeto.
-4. Clique no ícone de disquete para salvar.
-5. Clique no botão azul **Implantar** > **Nova Implantação**.
-6. Tipo: **App da Web**.
-7. Configuração:
-   - Executar como: **Eu** (seu e-mail).
-   - Quem pode acessar: **Qualquer um**.
-8. Clique em **Implantar** e autorize as permissões solicitadas pelo Google.
-9. Copie a **URL do App da Web** gerada (termina em `/exec`).
-10. No seu código frontend, abra o arquivo `src/services/pfcApi.ts` e cole a URL na variável `API_URL`.
+1. **Suba o código para o GitHub**: Crie um repositório privado ou público com os arquivos deste projeto.
+2. **Conecte à Vercel**: 
+   - No painel da Vercel, clique em `Add New` > `Project`.
+   - Importe seu repositório do GitHub.
+3. **Configure as Variáveis de Ambiente**:
+   - No passo de `Environment Variables`, adicione:
+     - **Key**: `VITE_API_URL`
+     - **Value**: `SUA_URL_DO_GOOGLE_APPS_SCRIPT_AQUI` (aquela que termina em `/exec`).
+4. **Deploy**: Clique em `Deploy`. A Vercel gerará um link automático (ex: `pfc-manager.vercel.app`).
 
-## Estrutura da Planilha Esperada
+## Uso no Dia a Dia
 
-- **Respostas ao formulário 1**: Registros individuais de gols/assists.
-- **JOGADORES**: Lista de nomes na primeira coluna.
-- **Jogos_2025**: Resultados de partidas (Data, Time1, Gols1, Time2, Gols2).
+### Organizador (Administrador)
+- **Escalação**: Deve ser feita minutos antes dos jogos começarem.
+- **Jogadas**: Devem ser lançadas durante ou logo após cada partida.
+- **Usuários**: Utilize a tela de Acessos para dar permissão limitada a outros amigos que queiram ajudar no lançamento.
 
-## Desenvolvimento Local
+### Atletas (Operadores)
+- **Check-in**: O atleta abre o site no celular assim que chegar na quadra e confirma presença. Isso ajuda o organizador a saber quem já está pronto para jogar.
 
-```bash
-npm install
-npm run dev
-```
+### Visualização
+- **Resultados**: Ideal para compartilhar o "print" do campeão do dia no grupo do WhatsApp.
+- **Dashboard**: Ideal para consultar no final do ano e decidir premiações de artilharia.
 
-O sistema funcionará em modo "Cache Local" caso a URL da API não seja fornecida, usando dados de exemplo baseados na sua planilha.
+## Configuração do Backend (Lembrete)
+Não esqueça de publicar o script no Google Apps Script como **App da Web** com acesso para **Qualquer um**, caso contrário o sistema não conseguirá ler os dados da planilha.

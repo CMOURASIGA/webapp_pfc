@@ -5,6 +5,7 @@ import { ToastType } from '../types';
 import { getTodayISO, formatISOToBR } from '../utils/dateUtils';
 import { User, Trophy, HandHeart, Crown, PlusCircle, ArrowLeft, Trash2, Edit3, Save, X, RefreshCw, AlertTriangle } from 'lucide-react';
 import LoadingSpinner from '../components/feedback/LoadingSpinner';
+import InfoBanner from '../components/Layout/InfoBanner';
 
 interface RegisterPlayPageProps {
   onToast: (text: string, type: ToastType) => void;
@@ -26,7 +27,6 @@ const RegisterPlayPage: React.FC<RegisterPlayPageProps> = ({ onToast }) => {
   const [dailyPlays, setDailyPlays] = useState<any[]>([]);
   const [editingRowIndex, setEditingRowIndex] = useState<number | null>(null);
 
-  // Estados para o Modal de Confirmação de Exclusão
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [playToDelete, setPlayToDelete] = useState<any>(null);
 
@@ -47,20 +47,15 @@ const RegisterPlayPage: React.FC<RegisterPlayPageProps> = ({ onToast }) => {
     }
   }, [data, onToast]);
 
-  useEffect(() => {
-    loadPlayers();
-  }, [loadPlayers]);
-
-  useEffect(() => {
-    loadDailyPlays();
-  }, [loadDailyPlays]);
+  useEffect(() => { loadPlayers(); }, [loadPlayers]);
+  useEffect(() => { loadDailyPlays(); }, [loadDailyPlays]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const finalJogador = isAddingNew ? novoJogador.trim().toUpperCase() : selectedJogador;
 
     if (!finalJogador) {
-      onToast('Selecione ou digite o nome do atleta.', ToastType.ERROR);
+      onToast('Selecione o atleta.', ToastType.ERROR);
       return;
     }
 
@@ -70,19 +65,19 @@ const RegisterPlayPage: React.FC<RegisterPlayPageProps> = ({ onToast }) => {
 
       if (editingRowIndex) {
         await editPlay(editingRowIndex, payload);
-        onToast(`Registro de ${finalJogador} atualizado!`, ToastType.SUCCESS);
+        onToast('Atualizado!', ToastType.SUCCESS);
         setEditingRowIndex(null);
       } else {
         await registerPlay(payload);
-        onToast(`Jogada de ${finalJogador} registrada!`, ToastType.SUCCESS);
+        onToast('Registrado!', ToastType.SUCCESS);
       }
       
       setGols(0); setAssist(0); setCapitao(false);
       if (isAddingNew) { setIsAddingNew(false); setNovoJogador(''); loadPlayers(); }
       
-      setTimeout(loadDailyPlays, 2000);
+      setTimeout(loadDailyPlays, 1500);
     } catch (err) {
-      onToast('Erro de conexão com o banco de dados.', ToastType.ERROR);
+      onToast('Erro ao salvar.', ToastType.ERROR);
     } finally {
       setLoading(false);
     }
@@ -90,11 +85,6 @@ const RegisterPlayPage: React.FC<RegisterPlayPageProps> = ({ onToast }) => {
 
   const handleEdit = (play: any) => {
     const idx = play.rowIndex || play.RowIndex || play.index || play.id;
-    if (!idx) {
-      onToast('Não foi possível identificar a linha para edição.', ToastType.ERROR);
-      return;
-    }
-    
     setEditingRowIndex(Number(idx));
     setSelectedJogador(play["Jogador"] || '');
     setIsAddingNew(false);
@@ -102,33 +92,21 @@ const RegisterPlayPage: React.FC<RegisterPlayPageProps> = ({ onToast }) => {
     setGols(Number(play["Gols"] || 0));
     setAssist(Number(play["Assistência"] || play["Assist"] || 0));
     setCapitao(play["Capitão"] === 'Sim' || play["Vencedor da rodada"] === 'Sim');
-    
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Abre a "tela inicial" de exclusão (Modal)
-  const openDeleteConfirmation = (play: any) => {
-    setPlayToDelete(play);
-    setShowDeleteModal(true);
-  };
-
-  // Executa a exclusão de fato após confirmação no modal
   const executeDelete = async () => {
     if (!playToDelete) return;
-    
     const idx = playToDelete.rowIndex || playToDelete.RowIndex || playToDelete.index || playToDelete.id;
-    
-    setLoading(true); // Mostrar loading no botão do modal se quiser, ou usar o global
-    setShowDeleteModal(false); // Fecha o modal imediatamente para UX fluida
+    setLoading(true);
+    setShowDeleteModal(false);
     setTableLoading(true);
-
     try {
       await deletePlay(Number(idx));
-      onToast(`Registro excluído com sucesso.`, ToastType.SUCCESS);
-      setPlayToDelete(null);
-      setTimeout(loadDailyPlays, 1500);
+      onToast('Excluído.', ToastType.SUCCESS);
+      setTimeout(loadDailyPlays, 1000);
     } catch (err) {
-      onToast('Falha ao excluir o registro.', ToastType.ERROR);
+      onToast('Erro ao excluir.', ToastType.ERROR);
     } finally {
       setTableLoading(false);
       setLoading(false);
@@ -136,219 +114,121 @@ const RegisterPlayPage: React.FC<RegisterPlayPageProps> = ({ onToast }) => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-12 pb-24 relative">
-      
-      {/* MODAL DE CONFIRMAÇÃO DE EXCLUSÃO */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="p-8 text-center space-y-4">
-              <div className="w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center mx-auto mb-2">
-                <AlertTriangle className="w-10 h-10 text-rose-500" />
-              </div>
-              <h3 className="text-xl font-black text-gray-900 uppercase tracking-tight">Confirmar Exclusão?</h3>
-              <p className="text-gray-500 text-sm font-medium">
-                Você está prestes a apagar o registro de <strong className="text-gray-900">{playToDelete?.["Jogador"]}</strong>. 
-                Esta ação não pode ser desfeita.
-              </p>
-            </div>
-            <div className="flex border-t border-gray-100">
-              <button 
-                onClick={() => { setShowDeleteModal(false); setPlayToDelete(null); }}
-                className="flex-1 py-6 font-black text-gray-400 uppercase text-xs tracking-widest hover:bg-gray-50 transition-colors"
-              >
-                Cancelar
-              </button>
-              <button 
-                onClick={executeDelete}
-                className="flex-1 py-6 font-black text-rose-600 uppercase text-xs tracking-widest hover:bg-rose-50 transition-colors border-l border-gray-100"
-              >
-                Sim, Excluir
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+    <div className="max-w-xl mx-auto space-y-8">
+      <InfoBanner 
+        text="Registre gols e assistências de cada partida. Atletas marcados como 'Capitão' são os vencedores da rodada."
+      />
 
-      {/* FORMULÁRIO DE REGISTRO */}
-      <section className="max-w-xl mx-auto">
-        <div className="flex justify-between items-end mb-6">
-          <div className="space-y-1">
-            <h2 className="text-3xl font-black text-[#0b2340] tracking-tighter uppercase leading-none">
-              {editingRowIndex ? 'Editar Atleta' : 'Novo Registro'}
-            </h2>
-            <p className="text-gray-400 font-bold text-xs uppercase tracking-widest italic">Painel de Lançamento</p>
-          </div>
+      <section className="bg-white rounded-[2rem] shadow-xl p-6 border border-gray-100">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-black text-[#0b2340] uppercase tracking-tighter">
+            {editingRowIndex ? 'Editar Jogada' : 'Lançar Jogada'}
+          </h2>
           {editingRowIndex && (
-            <button onClick={() => { setEditingRowIndex(null); setSelectedJogador(''); }} className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 text-rose-600 rounded-lg text-[10px] font-black uppercase hover:bg-rose-100 transition-colors">
-              <X className="w-3 h-3" /> Cancelar
+            <button onClick={() => { setEditingRowIndex(null); setSelectedJogador(''); }} className="text-rose-500 font-black text-[8px] uppercase">
+              Cancelar
             </button>
           )}
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-[2rem] shadow-2xl p-8 space-y-8 border border-gray-100 relative">
-          {editingRowIndex && <div className="absolute inset-0 bg-blue-50/10 border-2 border-blue-500 rounded-[2rem] pointer-events-none animate-pulse" />}
-          
-          <div className="space-y-3">
-            <label className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
-              <User className="w-4 h-4 text-[#0b2340]" /> Atleta
-            </label>
-            
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Atleta</label>
             {!isAddingNew ? (
-              <div className="relative">
-                <select
-                  value={selectedJogador}
-                  onChange={(e) => e.target.value === 'NEW' ? setIsAddingNew(true) : setSelectedJogador(e.target.value)}
-                  className="w-full px-5 py-4 rounded-2xl border-2 border-gray-100 focus:border-[#0b2340] outline-none bg-gray-50 text-gray-900 font-black text-lg appearance-none cursor-pointer"
-                >
-                  <option value="" disabled>SELECIONE...</option>
-                  <option value="NEW" className="text-blue-600 font-black">+ CADASTRAR NOVO</option>
-                  {jogadores.map((j) => <option key={j} value={j}>{j}</option>)}
-                </select>
-                <PlusCircle className="absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 pointer-events-none" />
-              </div>
+              <select
+                value={selectedJogador}
+                onChange={(e) => e.target.value === 'NEW' ? setIsAddingNew(true) : setSelectedJogador(e.target.value)}
+                className="w-full px-4 py-4 rounded-xl border border-gray-100 bg-gray-50 text-gray-900 font-black text-sm outline-none"
+              >
+                <option value="" disabled>SELECIONE...</option>
+                <option value="NEW">+ NOVO JOGADOR</option>
+                {jogadores.map((j) => <option key={j} value={j}>{j}</option>)}
+              </select>
             ) : (
-              <div className="relative animate-in slide-in-from-top-2">
+              <div className="relative">
                 <input
-                  type="text"
-                  autoFocus
+                  type="text" autoFocus
                   value={novoJogador}
                   onChange={(e) => setNovoJogador(e.target.value.toUpperCase())}
-                  placeholder="NOME COMPLETO..."
-                  className="w-full px-5 py-4 rounded-2xl border-2 border-blue-200 outline-none bg-blue-50 text-gray-900 font-black text-lg uppercase"
+                  placeholder="NOME..."
+                  className="w-full px-4 py-4 rounded-xl border border-blue-100 bg-blue-50 text-gray-900 font-black text-sm uppercase outline-none"
                 />
-                <button type="button" onClick={() => setIsAddingNew(false)} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-blue-500 font-black text-[10px] flex items-center gap-1 bg-white rounded-lg shadow-sm border border-blue-100 uppercase">
-                  <ArrowLeft className="w-3 h-3" /> Voltar
-                </button>
+                <button type="button" onClick={() => setIsAddingNew(false)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[8px] font-black uppercase text-blue-500">Voltar</button>
               </div>
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Data</label>
-              <input type="date" value={data} onChange={(e) => setData(e.target.value)} className="w-full px-5 py-4 rounded-2xl border-2 border-gray-100 bg-gray-50 text-gray-900 font-black text-sm" />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Gols</label>
+              <select value={gols} onChange={(e) => setGols(Number(e.target.value))} className="w-full px-4 py-4 rounded-xl border border-gray-100 bg-gray-50 text-xl text-center font-black">{[...Array(11)].map((_, i) => <option key={i} value={i}>{i}</option>)}</select>
             </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Time</label>
-              <select value={time} onChange={(e) => setTime(e.target.value)} className="w-full px-5 py-4 rounded-2xl border-2 border-gray-100 bg-gray-50 text-gray-900 font-black text-sm cursor-pointer">
-                {['T1', 'T2', 'T3', 'T4'].map((t) => <option key={t} value={t}>{t}</option>)}
-              </select>
+            <div className="space-y-1">
+              <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Assist</label>
+              <select value={assist} onChange={(e) => setAssist(Number(e.target.value))} className="w-full px-4 py-4 rounded-xl border border-gray-100 bg-gray-50 text-xl text-center font-black">{[...Array(11)].map((_, i) => <option key={i} value={i}>{i}</option>)}</select>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1"><Trophy className="w-4 h-4 text-rose-500" /> Gols</label>
-              <select value={gols} onChange={(e) => setGols(Number(e.target.value))} className="w-full px-5 py-5 rounded-2xl border-2 border-gray-100 bg-gray-50 text-2xl text-center font-black text-gray-900">{[...Array(16)].map((_, i) => <option key={i} value={i}>{i}</option>)}</select>
-            </div>
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1"><HandHeart className="w-4 h-4 text-sky-500" /> Assists</label>
-              <select value={assist} onChange={(e) => setAssist(Number(e.target.value))} className="w-full px-5 py-5 rounded-2xl border-2 border-gray-100 bg-gray-50 text-2xl text-center font-black text-gray-900">{[...Array(11)].map((_, i) => <option key={i} value={i}>{i}</option>)}</select>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between p-6 bg-gray-50 rounded-3xl border border-gray-100 cursor-pointer" onClick={() => setCapitao(!capitao)}>
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl" onClick={() => setCapitao(!capitao)}>
              <div className="flex items-center gap-3">
-              <div className={`p-3 rounded-xl transition-all ${capitao ? 'bg-yellow-400 text-white rotate-12' : 'bg-gray-200 text-gray-400'}`}><Crown className="w-6 h-6" /></div>
-              <span className="text-sm font-black text-[#0b2340] uppercase">Capitão?</span>
+              <Crown className={`w-5 h-5 ${capitao ? 'text-yellow-500' : 'text-gray-300'}`} />
+              <span className="text-[10px] font-black text-[#0b2340] uppercase">Venceu a rodada?</span>
             </div>
-            <div className={`w-12 h-6 rounded-full relative transition-colors ${capitao ? 'bg-[#0b2340]' : 'bg-gray-300'}`}>
-              <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${capitao ? 'right-1' : 'left-1'}`} />
+            <div className={`w-10 h-5 rounded-full relative ${capitao ? 'bg-[#0b2340]' : 'bg-gray-300'}`}>
+              <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all ${capitao ? 'right-0.5' : 'left-0.5'}`} />
             </div>
           </div>
 
-          <button type="submit" disabled={loading} className="w-full py-5 rounded-[2rem] bg-[#0b2340] text-white font-black text-xl hover:bg-blue-900 shadow-2xl transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50">
-            {loading ? <RefreshCw className="w-6 h-6 animate-spin" /> : editingRowIndex ? <Save className="w-6 h-6" /> : null}
-            {loading ? 'SINCRONIZANDO...' : editingRowIndex ? 'SALVAR ALTERAÇÃO' : 'CONFIRMAR JOGADA'}
+          <button type="submit" disabled={loading} className="w-full py-5 bg-[#0b2340] text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg active:scale-95 disabled:opacity-50">
+            {loading ? 'SINCRONIZANDO...' : editingRowIndex ? 'SALVAR' : 'CONFIRMAR'}
           </button>
         </form>
       </section>
 
-      {/* TABELA DE RESULTADOS DO DIA */}
-      <section className="space-y-6">
-        <div className="flex items-center justify-between px-4">
-           <div className="flex items-center gap-3">
-            <div className="w-1.5 h-6 bg-[#0b2340] rounded-full"></div>
-            <h3 className="text-xl font-black text-gray-900 uppercase tracking-tight">Estatísticas {formatISOToBR(data)}</h3>
-          </div>
-          <button onClick={loadDailyPlays} className="p-2 text-[#0b2340] hover:bg-white rounded-full transition-all shadow-sm">
-            <RefreshCw className={`w-5 h-5 ${tableLoading ? 'animate-spin' : ''}`} />
-          </button>
-        </div>
+      <section className="space-y-4">
+        <h3 className="text-sm font-black text-gray-900 uppercase tracking-tight flex items-center justify-between px-2">
+          Registros do Dia
+          <button onClick={loadDailyPlays} className="p-2"><RefreshCw className={`w-4 h-4 ${tableLoading ? 'animate-spin' : ''}`} /></button>
+        </h3>
 
-        {tableLoading ? (
-          <div className="py-20 bg-white rounded-[2rem] shadow-sm flex justify-center"><LoadingSpinner text="Consultando Planilha..." /></div>
-        ) : dailyPlays.length === 0 ? (
-          <div className="py-20 bg-white rounded-[2rem] border-2 border-dashed border-gray-100 text-center">
-            <p className="text-gray-400 font-black uppercase text-xs tracking-widest">Nenhum registro para esta data.</p>
-          </div>
+        {tableLoading ? <LoadingSpinner text="Buscando..." /> : dailyPlays.length === 0 ? (
+          <div className="p-12 text-center text-gray-400 font-black uppercase text-[10px]">Vazio</div>
         ) : (
-          <div className="bg-white rounded-[2rem] shadow-xl border border-gray-100 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead className="bg-[#0b2340] text-white text-[10px] font-black uppercase tracking-[0.2em]">
-                  <tr>
-                    <th className="px-6 py-6">Atleta</th>
-                    <th className="px-6 py-6 text-center">T</th>
-                    <th className="px-6 py-6 text-center">G</th>
-                    <th className="px-6 py-6 text-center">A</th>
-                    <th className="px-6 py-6 text-center">C</th>
-                    <th className="px-6 py-6 text-center">Ações</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50 font-medium">
-                  {dailyPlays.map((p, i) => (
-                    <tr key={i} className={`group ${editingRowIndex === (p.rowIndex || p.RowIndex) ? 'bg-blue-50' : 'hover:bg-gray-50/50'}`}>
-                      <td className="px-6 py-5 font-black text-gray-900 text-sm uppercase">
-                        {p["Jogador"]}
-                      </td>
-                      <td className="px-6 py-5 text-center">
-                        <span className="text-[10px] font-black bg-gray-100 text-gray-900 px-2 py-1 rounded-md">
-                          {p["Time"] || '-'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-5 text-center font-black text-gray-900">
-                        {p["Gols"] !== undefined ? p["Gols"] : 0}
-                      </td>
-                      <td className="px-6 py-5 text-center font-black text-gray-900">
-                        {p["Assistência"] !== undefined ? p["Assistência"] : (p["Assist"] || 0)}
-                      </td>
-                      <td className="px-6 py-5 text-center">
-                        {(p["Capitão"] === 'Sim' || p["Vencedor da rodada"] === 'Sim') ? (
-                          <Crown className="w-4 h-4 text-yellow-500 mx-auto" />
-                        ) : (
-                          <span className="text-gray-300">-</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-5">
-                        <div className="flex items-center justify-center gap-2">
-                          <button 
-                            type="button"
-                            onClick={() => handleEdit(p)} 
-                            className="p-3 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all shadow-sm active:scale-90"
-                            title="Editar Registro"
-                          >
-                            <Edit3 className="w-5 h-5" />
-                          </button>
-                          <button 
-                            type="button"
-                            onClick={() => openDeleteConfirmation(p)} 
-                            className="p-3 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-600 hover:text-white transition-all shadow-sm active:scale-90"
-                            title="Excluir Registro"
-                          >
-                            <Trash2 className="w-5 h-5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+          <div className="space-y-3">
+            {dailyPlays.map((p, i) => (
+              <div key={i} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-black text-sm uppercase text-gray-900">{p["Jogador"]}</span>
+                    {(p["Capitão"] === 'Sim' || p["Vencedor da rodada"] === 'Sim') && <Crown className="w-3 h-3 text-yellow-500" />}
+                  </div>
+                  <div className="flex gap-2 mt-1">
+                    <span className="text-[8px] font-black bg-rose-50 text-rose-600 px-1.5 py-0.5 rounded">{p["Gols"] || 0} GOLS</span>
+                    <span className="text-[8px] font-black bg-sky-50 text-sky-600 px-1.5 py-0.5 rounded">{p["Assistência"] || 0} AST</span>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => handleEdit(p)} className="p-2 bg-gray-50 rounded-lg text-blue-500"><Edit3 className="w-4 h-4" /></button>
+                  <button onClick={() => { setPlayToDelete(p); setShowDeleteModal(true); }} className="p-2 bg-gray-50 rounded-lg text-rose-500"><Trash2 className="w-4 h-4" /></button>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </section>
+
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm">
+          <div className="bg-white w-full max-w-xs rounded-3xl p-8 text-center space-y-6">
+            <h3 className="text-lg font-black text-gray-900 uppercase">Apagar?</h3>
+            <p className="text-gray-500 text-xs font-bold uppercase">{playToDelete?.["Jogador"]}</p>
+            <div className="flex gap-4">
+              <button onClick={() => setShowDeleteModal(false)} className="flex-1 py-3 text-gray-400 font-black uppercase text-[10px]">Não</button>
+              <button onClick={executeDelete} className="flex-1 py-3 bg-rose-500 text-white rounded-xl font-black uppercase text-[10px]">Sim</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

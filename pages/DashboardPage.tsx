@@ -11,7 +11,7 @@ import StatCard from '../components/stats/StatCard';
 import { 
   Filter, Users, Trophy, Award, TrendingUp, Calendar, 
   ChevronDown, Target, Zap, Star, Crown, Flame, 
-  TrendingDown, Activity, Medal, BarChart3
+  TrendingDown, Activity, Medal, BarChart3, Info
 } from 'lucide-react';
 
 const DashboardPage: React.FC = () => {
@@ -45,7 +45,6 @@ const DashboardPage: React.FC = () => {
     fetchDashboard();
   }, [filters]);
 
-  // Componente interno para o Pódio (Top 3)
   const Podium = ({ title, data, colorClass }: { title: string, data: any[], colorClass: string }) => {
     if (!data || data.length < 1) return null;
     const top1 = data[0];
@@ -56,7 +55,6 @@ const DashboardPage: React.FC = () => {
       <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-gray-100 flex flex-col items-center">
         <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-10">{title}</h3>
         <div className="flex items-end gap-2 w-full justify-center">
-          {/* 2º Lugar */}
           {top2 && (
             <div className="flex flex-col items-center group">
               <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center font-black text-gray-400 border-2 border-white shadow-md mb-2 group-hover:scale-110 transition-transform">
@@ -69,7 +67,6 @@ const DashboardPage: React.FC = () => {
             </div>
           )}
           
-          {/* 1º Lugar */}
           <div className="flex flex-col items-center group -translate-y-4">
             <div className={`w-20 h-20 ${colorClass} rounded-3xl flex items-center justify-center font-black text-white border-4 border-white shadow-2xl mb-2 relative group-hover:scale-110 transition-transform`}>
               <Crown className="absolute -top-6 w-8 h-8 text-yellow-400 fill-yellow-400 drop-shadow-md animate-bounce" />
@@ -82,7 +79,6 @@ const DashboardPage: React.FC = () => {
             </div>
           </div>
 
-          {/* 3º Lugar */}
           {top3 && (
             <div className="flex flex-col items-center group">
               <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center font-black text-gray-400 border-2 border-white shadow-md mb-2 group-hover:scale-110 transition-transform">
@@ -101,7 +97,14 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className="space-y-12 pb-24">
-      {/* HEADER DINÂMICO */}
+      {/* MINI EXPLICAÇÃO */}
+      <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4 flex items-start gap-3 shadow-sm animate-in fade-in duration-1000">
+        <Info className="w-5 h-5 text-orange-600 shrink-0 mt-0.5" />
+        <p className="text-[10px] text-orange-800 font-black uppercase leading-relaxed tracking-tight">
+          Painel de estatísticas acumuladas. Acompanhe a artilharia anual, líderes de assistência e o "hall da fama" dos maiores vencedores da temporada.
+        </p>
+      </div>
+
       <section className="relative overflow-hidden bg-[#0b2340] rounded-[3rem] p-10 lg:p-16 text-white shadow-[0_50px_100px_rgba(11,35,64,0.4)]">
         <div className="absolute top-0 right-0 w-1/2 h-full opacity-10 pointer-events-none">
           <img src="https://i.imgur.com/ExEJtwR.png" alt="" className="w-full h-full object-contain scale-150 rotate-12" />
@@ -156,8 +159,6 @@ const DashboardPage: React.FC = () => {
         <LoadingSpinner text="Processando Big Data PFC..." />
       ) : data ? (
         <div className="space-y-20">
-          
-          {/* DESTAQUES DA TEMPORADA - HALL OF FAME */}
           <section className="space-y-10">
             <div className="flex items-center gap-4 px-2">
               <div className="w-12 h-12 bg-yellow-400 rounded-2xl flex items-center justify-center shadow-lg shadow-yellow-200">
@@ -176,7 +177,6 @@ const DashboardPage: React.FC = () => {
             </div>
           </section>
 
-          {/* ANALYTICS DE EFICIÊNCIA */}
           <section className="grid grid-cols-1 xl:grid-cols-3 gap-10">
             <div className="xl:col-span-1 space-y-8">
                <div className="bg-[#0b2340] p-10 rounded-[3rem] text-white space-y-8 shadow-2xl relative overflow-hidden group">
@@ -220,15 +220,9 @@ const DashboardPage: React.FC = () => {
               <div className="bg-white rounded-[3rem] p-10 shadow-xl border border-gray-100 h-full">
                 <div className="flex items-center justify-between mb-10">
                   <h3 className="text-xl font-black text-[#0b2340] uppercase tracking-tighter flex items-center gap-3">
-                    {/* FIXED: Added missing BarChart3 import */}
                     <BarChart3 className="w-6 h-6 text-blue-500" />
                     Distribuição de Desempenho
                   </h3>
-                  <div className="flex gap-2">
-                    <div className="w-3 h-3 bg-rose-500 rounded-full"></div>
-                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                    <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
-                  </div>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                    <div className="space-y-4">
@@ -244,7 +238,6 @@ const DashboardPage: React.FC = () => {
             </div>
           </section>
 
-          {/* TABELAS GERAIS DE CLASSIFICAÇÃO */}
           <section className="space-y-10">
             <div className="flex items-center gap-4 px-2">
               <div className="w-12 h-12 bg-[#0b2340] rounded-2xl flex items-center justify-center shadow-lg">
@@ -278,7 +271,6 @@ const DashboardPage: React.FC = () => {
             </div>
           </section>
 
-          {/* ASSIDUIDADE */}
           <section className="bg-emerald-500 rounded-[3rem] p-10 lg:p-16 text-white shadow-2xl relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-12 opacity-10 group-hover:rotate-12 transition-transform">
               <Users className="w-48 h-48" />
@@ -286,7 +278,7 @@ const DashboardPage: React.FC = () => {
             <div className="relative z-10 flex flex-col lg:flex-row lg:items-center gap-16">
               <div className="max-w-md space-y-6">
                  <h2 className="text-5xl font-black uppercase tracking-tighter leading-none">Presença <br /> Garantida</h2>
-                 <p className="text-emerald-100 font-medium">Os jogadores mais fiéis à pelada. Aqueles que não importa o clima, estão em campo.</p>
+                 <p className="text-emerald-100 font-medium font-black uppercase text-xs">Os pilares da pelada. Quem nunca falta.</p>
                  <div className="flex items-center gap-4">
                     <div className="bg-white/20 px-6 py-3 rounded-2xl backdrop-blur-md">
                        <span className="text-3xl font-black">{data.nivelPresenca[0]?.presencas || 0}</span>

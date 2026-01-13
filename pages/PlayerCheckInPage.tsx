@@ -3,8 +3,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { getTeamAssignmentsByDate, confirmArrival } from '../services/pfcApi';
 import { ToastType } from '../types';
 import { getTodayISO } from '../utils/dateUtils';
-import { UserCheck, Search, ChevronRight, CheckCircle2, ArrowLeft, Send, Users, Calendar, Info } from 'lucide-react';
+import { UserCheck, Search, ChevronRight, CheckCircle2, ArrowLeft, Send, Users, Calendar } from 'lucide-react';
 import LoadingSpinner from '../components/feedback/LoadingSpinner';
+import InfoBanner from '../components/Layout/InfoBanner';
 
 interface PlayerCheckInPageProps {
   onToast: (text: string, type: ToastType) => void;
@@ -55,29 +56,25 @@ const PlayerCheckInPage: React.FC<PlayerCheckInPageProps> = ({ onToast }) => {
   if (loading && step !== 3) return <LoadingSpinner text="Sincronizando vestiário..." />;
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-8 space-y-8">
-      {/* MINI EXPLICAÇÃO */}
-      <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-start gap-3 shadow-sm animate-in fade-in duration-700">
-        <Info className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
-        <p className="text-[10px] text-emerald-800 font-black uppercase leading-relaxed tracking-tight">
-          Confirme sua presença aqui para que o organizador saiba que você já está na quadra. Jogadores sem check-in não pontuam por presença.
-        </p>
-      </div>
+    <div className="max-w-xl mx-auto px-1 space-y-6">
+      <InfoBanner 
+        variant="emerald"
+        text="Confirme sua presença aqui para que o organizador saiba que você já está na quadra. Jogadores sem check-in não pontuam por presença."
+      />
 
-      {/* CABEÇALHO */}
       <div className="text-center space-y-2">
-        <div className="w-20 h-20 bg-[#0b2340] rounded-[2rem] flex items-center justify-center mx-auto shadow-2xl rotate-3 mb-6">
-          <UserCheck className="w-10 h-10 text-white" />
+        <div className="w-16 h-16 bg-[#0b2340] rounded-[1.8rem] flex items-center justify-center mx-auto shadow-xl rotate-3 mb-4">
+          <UserCheck className="w-8 h-8 text-white" />
         </div>
-        <h1 className="text-4xl font-black text-[#0b2340] uppercase tracking-tighter">Chegada PFC</h1>
-        <p className="text-gray-900 font-bold text-xs uppercase tracking-widest italic">Confirme que você já está na quadra</p>
+        <h1 className="text-3xl font-black text-[#0b2340] uppercase tracking-tighter">Chegada PFC</h1>
+        <p className="text-gray-900 font-bold text-[10px] uppercase tracking-widest italic">Confirme que você já está na quadra</p>
       </div>
 
       <div className="flex items-center justify-center">
-        <div className="flex items-center gap-3 px-6 py-3 bg-white rounded-2xl shadow-sm border border-gray-100 transition-all hover:shadow-md">
+        <div className="flex items-center gap-3 px-6 py-3 bg-white rounded-2xl shadow-sm border border-gray-100">
           <Calendar className="w-5 h-5 text-[#0b2340]" />
           <div className="flex flex-col">
-            <span className="text-[9px] font-black text-gray-400 uppercase leading-none mb-1">Dia da Pelada</span>
+            <span className="text-[9px] font-black text-gray-400 uppercase leading-none mb-1">Data</span>
             <input 
               type="date" 
               value={data} 
@@ -85,7 +82,7 @@ const PlayerCheckInPage: React.FC<PlayerCheckInPageProps> = ({ onToast }) => {
                 setData(e.target.value);
                 setStep(1);
               }}
-              className="bg-transparent text-sm font-black text-black outline-none cursor-pointer"
+              className="bg-transparent text-sm font-black text-black outline-none"
             />
           </div>
         </div>
@@ -93,43 +90,41 @@ const PlayerCheckInPage: React.FC<PlayerCheckInPageProps> = ({ onToast }) => {
 
       {step === 1 && (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
-          <div className="bg-white rounded-[2.5rem] shadow-2xl border border-gray-100 p-8">
-            <h3 className="text-lg font-black text-black uppercase mb-6 flex items-center gap-3">
-              <span className="w-8 h-8 bg-blue-100 text-[#0b2340] rounded-full flex items-center justify-center text-sm font-black italic">1</span>
-              Selecione seu nome
+          <div className="bg-white rounded-[2rem] shadow-xl border border-gray-100 p-6">
+            <h3 className="text-sm font-black text-black uppercase mb-4 flex items-center gap-2">
+              <span className="w-6 h-6 bg-blue-100 text-[#0b2340] rounded-full flex items-center justify-center text-[10px] font-black italic">1</span>
+              Quem é você?
             </h3>
             
-            <div className="relative mb-6">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <div className="relative mb-4">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input 
                 type="text" 
-                placeholder="BUSCAR ENTRE ESCALADOS..." 
-                className="w-full pl-12 pr-4 py-5 rounded-2xl border-2 border-gray-200 outline-none focus:border-[#0b2340] text-sm font-black uppercase text-black placeholder:text-gray-400 bg-gray-50"
+                placeholder="BUSCAR NOME..." 
+                className="w-full pl-10 pr-4 py-4 rounded-xl border-2 border-gray-100 outline-none focus:border-[#0b2340] text-xs font-black uppercase text-black bg-gray-50"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
 
-            <div className="max-h-[450px] overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+            <div className="max-h-[350px] overflow-y-auto space-y-2 pr-1 custom-scrollbar">
               {pendingPlayers.length === 0 ? (
-                 <div className="py-20 text-center space-y-4 opacity-40">
-                    <Users className="w-12 h-12 mx-auto text-gray-400" />
-                    <p className="text-[10px] font-black uppercase tracking-widest leading-relaxed">
-                      {searchTerm ? 'Nenhum jogador escalado com esse nome.' : 'Nenhum jogador pendente de check-in para esta data.'}
-                    </p>
+                 <div className="py-12 text-center space-y-3 opacity-30">
+                    <Users className="w-10 h-10 mx-auto text-gray-400" />
+                    <p className="text-[9px] font-black uppercase tracking-widest">Nenhum jogador pendente.</p>
                  </div>
               ) : (
                 pendingPlayers.map(a => (
                   <button 
                     key={a.rowIndex}
                     onClick={() => { setSelectedPlayer(a.nome); setStep(2); }}
-                    className="w-full p-6 bg-white border-2 border-gray-100 hover:border-[#0b2340] hover:bg-gray-50 rounded-2xl flex items-center justify-between transition-all group shadow-sm active:scale-[0.98]"
+                    className="w-full p-5 bg-white border border-gray-100 hover:border-[#0b2340] rounded-xl flex items-center justify-between transition-all group shadow-sm active:scale-[0.98]"
                   >
                     <div className="flex flex-col items-start">
-                      <span className="font-black text-base uppercase text-black">{a.nome}</span>
-                      <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded mt-1 uppercase">TIME: {a.time}</span>
+                      <span className="font-black text-sm uppercase text-black">{a.nome}</span>
+                      <span className="text-[8px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded mt-1 uppercase">TIME: {a.time}</span>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-[#0b2340] group-hover:translate-x-1 transition-all" />
+                    <ChevronRight className="w-4 h-4 text-gray-300" />
                   </button>
                 ))
               )}
@@ -140,27 +135,27 @@ const PlayerCheckInPage: React.FC<PlayerCheckInPageProps> = ({ onToast }) => {
 
       {step === 2 && (
         <div className="space-y-6 animate-in zoom-in-95 duration-300">
-           <button 
+          <button 
             onClick={() => setStep(1)}
-            className="flex items-center gap-2 text-[10px] font-black text-black uppercase tracking-widest hover:text-blue-700 transition-colors bg-white px-4 py-2 rounded-full shadow-sm border border-gray-100"
+            className="flex items-center gap-2 text-[10px] font-black text-black uppercase tracking-widest bg-white px-4 py-2 rounded-full shadow-sm border border-gray-100"
           >
-            <ArrowLeft className="w-3 h-3" /> Voltar à lista
+            <ArrowLeft className="w-3 h-3" /> Voltar
           </button>
 
-          <div className="bg-white rounded-[2.5rem] shadow-2xl border border-gray-100 p-10 text-center">
-            <div className="w-24 h-24 bg-blue-50 text-[#0b2340] rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-white shadow-lg">
-               <UserCheck className="w-10 h-10" />
+          <div className="bg-white rounded-[2rem] shadow-xl border border-gray-100 p-8 text-center">
+            <div className="w-20 h-20 bg-blue-50 text-[#0b2340] rounded-full flex items-center justify-center mx-auto mb-4">
+               <UserCheck className="w-8 h-8" />
             </div>
-            <h3 className="text-[12px] font-black text-blue-600 uppercase tracking-[0.2em] mb-2">Confirmar Chegada</h3>
-            <h2 className="text-3xl font-black text-black uppercase tracking-tighter mb-8 leading-tight">
+            <h3 className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-2">Confirmar Chegada</h3>
+            <h2 className="text-2xl font-black text-black uppercase tracking-tighter mb-8 leading-tight">
               {selectedPlayer}
             </h2>
             
             <button 
               onClick={handleConfirmArrival}
-              className="w-full py-6 bg-[#0b2340] text-white rounded-[2rem] font-black text-xl uppercase tracking-widest shadow-[0_20px_40px_rgba(11,35,64,0.3)] hover:bg-blue-900 transition-all flex items-center justify-center gap-4 active:scale-95 group"
+              className="w-full py-5 bg-[#0b2340] text-white rounded-[1.5rem] font-black text-lg uppercase tracking-widest shadow-lg flex items-center justify-center gap-3 active:scale-95 group"
             >
-              <Send className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+              <Send className="w-5 h-5" />
               EU CHEGUEI!
             </button>
           </div>
@@ -168,27 +163,19 @@ const PlayerCheckInPage: React.FC<PlayerCheckInPageProps> = ({ onToast }) => {
       )}
 
       {step === 3 && (
-        <div className="text-center space-y-8 animate-in zoom-in duration-500">
-          <div className="w-32 h-32 bg-emerald-500 rounded-full flex items-center justify-center mx-auto shadow-[0_0_50px_rgba(16,185,129,0.4)] animate-pulse">
-            <CheckCircle2 className="w-16 h-16 text-white" />
+        <div className="text-center space-y-6 animate-in zoom-in duration-500">
+          <div className="w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center mx-auto shadow-lg animate-pulse">
+            <CheckCircle2 className="w-12 h-12 text-white" />
           </div>
-          <div className="space-y-2">
-            <h2 className="text-3xl font-black text-black uppercase tracking-tighter">Check-in Realizado!</h2>
-            <p className="text-gray-900 font-bold text-lg italic">Bom jogo, <span className="text-[#0b2340] underline">{selectedPlayer}</span>!</p>
-          </div>
-          <div className="bg-white p-8 rounded-[2rem] border-2 border-emerald-100 shadow-xl inline-block max-w-sm">
-             <p className="text-sm font-black text-black uppercase tracking-widest leading-relaxed">Sua presença foi confirmada. Seu time já conta com você no painel!</p>
+          <div className="space-y-1">
+            <h2 className="text-2xl font-black text-black uppercase tracking-tighter">Check-in Realizado!</h2>
+            <p className="text-gray-900 font-bold text-sm italic">Bom jogo, <span className="text-[#0b2340] underline">{selectedPlayer}</span>!</p>
           </div>
           <button 
-            onClick={() => {
-              setStep(1);
-              setSelectedPlayer('');
-              setSearchTerm('');
-              loadDailyAssignments();
-            }}
-            className="block mx-auto py-4 px-8 bg-gray-100 text-black font-black text-xs uppercase tracking-[0.2em] hover:bg-gray-200 rounded-2xl transition-all active:scale-95"
+            onClick={() => { setStep(1); setSelectedPlayer(''); setSearchTerm(''); loadDailyAssignments(); }}
+            className="block mx-auto py-4 px-8 bg-gray-100 text-black font-black text-[10px] uppercase tracking-widest rounded-xl"
           >
-            Voltar ao início
+            Concluir
           </button>
         </div>
       )}

@@ -10,9 +10,9 @@ interface ToastContainerProps {
 
 const ToastContainer: React.FC<ToastContainerProps> = ({ messages, onRemove }) => {
   return (
-    <div className="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none">
+    <div className="fixed top-6 left-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none items-center">
       {messages.map((m) => (
-        <div key={m.id} className="pointer-events-auto">
+        <div key={m.id} className="pointer-events-auto w-full max-w-sm">
           <Toast message={m} onRemove={onRemove} />
         </div>
       ))}

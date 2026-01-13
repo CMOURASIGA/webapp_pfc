@@ -10,35 +10,41 @@ const NavMenu: React.FC = () => {
 
   const allTabs: { to: string; label: string; icon: any; routine: Routine }[] = [
     { to: '/checkin', label: 'Check-in', icon: UserCheck, routine: 'checkin' },
-    { to: '/registro/escalacao', label: 'Escalação', icon: UsersRound, routine: 'escalacao' },
-    { to: '/registro/jogadas', label: 'Jogadas', icon: ClipboardList, routine: 'jogadas' },
-    { to: '/registro/partidas', label: 'Partidas', icon: Swords, routine: 'partidas' },
-    { to: '/resultados', label: 'Resultados', icon: CalendarDays, routine: 'resultados' },
-    { to: '/dashboard', label: 'Dashboard', icon: BarChart3, routine: 'dashboard' },
-    { to: '/admin/usuarios', label: 'Acessos', icon: Shield, routine: 'usuarios' },
+    { to: '/registro/escalacao', label: 'Times', icon: UsersRound, routine: 'escalacao' },
+    { to: '/registro/jogadas', label: 'Gols', icon: ClipboardList, routine: 'jogadas' },
+    { to: '/registro/partidas', label: 'Jogos', icon: Swords, routine: 'partidas' },
+    { to: '/resultados', label: 'Resumo', icon: CalendarDays, routine: 'resultados' },
+    { to: '/dashboard', label: 'Dash', icon: BarChart3, routine: 'dashboard' },
     { to: '/ajuda', label: 'Ajuda', icon: HelpCircle, routine: 'ajuda' },
   ];
 
-  // Filtra abas baseado no usuário logado
   const activeTabs = allTabs.filter(tab => hasPermission(user, tab.routine));
 
   return (
-    <nav className="bg-white border-b border-gray-200 overflow-x-auto shadow-sm">
-      <div className="flex justify-center min-w-max">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 z-[100] pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
+      <div className="flex justify-around items-center h-16 max-w-7xl mx-auto px-2">
         {activeTabs.map((tab) => (
           <NavLink
             key={tab.to}
             to={tab.to}
             className={({ isActive }) =>
-              `flex items-center gap-2 px-6 py-4 text-[11px] font-black uppercase tracking-tight transition-all border-b-4 ${
+              `flex flex-col items-center justify-center flex-1 h-full gap-1 transition-all ${
                 isActive
-                  ? 'border-[#0b2340] text-[#0b2340] bg-blue-50/40'
-                  : 'border-transparent text-gray-400 hover:text-[#0b2340]'
+                  ? 'text-[#0b2340]'
+                  : 'text-gray-300'
               }`
             }
           >
-            <tab.icon className="w-4 h-4" />
-            {tab.label}
+            {({ isActive }) => (
+              <>
+                <div className={`p-1.5 rounded-xl transition-all ${isActive ? 'bg-blue-50' : 'bg-transparent'}`}>
+                  <tab.icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5px]' : 'stroke-[1.5px]'}`} />
+                </div>
+                <span className={`text-[8px] font-black uppercase tracking-tighter ${isActive ? 'opacity-100' : 'opacity-60'}`}>
+                  {tab.label}
+                </span>
+              </>
+            )}
           </NavLink>
         ))}
       </div>

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { getUsuariosPlanilha, saveUsuarioPlanilha, deleteUsuarioPlanilha } from '../services/pfcApi';
 import { User, Routine, ToastType } from '../types';
-import { Users, UserPlus, Trash2, Shield, Check, X, ShieldAlert, Key, RefreshCw } from 'lucide-react';
+import { Users, UserPlus, Trash2, Shield, Check, X, ShieldAlert, Key, RefreshCw, Info } from 'lucide-react';
 
 interface UserManagementPageProps {
   onToast: (text: string, type: ToastType) => void;
@@ -15,7 +15,8 @@ const ROUTINES_LIST: { id: Routine; label: string }[] = [
   { id: 'partidas', label: 'Lançar Partidas' },
   { id: 'resultados', label: 'Ver Resultados' },
   { id: 'dashboard', label: 'Dashboard Anual' },
-  { id: 'usuarios', label: 'Gestão de Acessos' }
+  { id: 'usuarios', label: 'Gestão de Acessos' },
+  { id: 'ajuda', label: 'Ajuda e Guia' }
 ];
 
 const UserManagementPage: React.FC<UserManagementPageProps> = ({ onToast }) => {
@@ -75,7 +76,7 @@ const UserManagementPage: React.FC<UserManagementPageProps> = ({ onToast }) => {
 
   const handleDelete = async (id: string) => {
     if (id === 'admin-001') {
-      onToast('Impossível remover o Administrador padrão do sistema.', ToastType.ERROR);
+      onToast('Impossível remover o Administrador padrão.', ToastType.ERROR);
       return;
     }
     
@@ -103,11 +104,19 @@ const UserManagementPage: React.FC<UserManagementPageProps> = ({ onToast }) => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-10">
+    <div className="max-w-4xl mx-auto space-y-8">
+      {/* MINI EXPLICAÇÃO */}
+      <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-start gap-3 shadow-sm">
+        <Info className="w-5 h-5 text-slate-600 shrink-0 mt-0.5" />
+        <p className="text-[10px] text-slate-800 font-black uppercase leading-relaxed tracking-tight">
+          Gestão de Segurança. Crie contas individuais para cada organizador e defina quais telas cada um pode acessar. Administradores têm acesso total.
+        </p>
+      </div>
+
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-black text-[#0b2340] uppercase tracking-tighter">Gestão de Acessos</h2>
-          <p className="text-gray-400 font-bold text-xs uppercase tracking-widest italic">Fonte: Planilha Google (aba usuario)</p>
+          <p className="text-gray-400 font-bold text-xs uppercase tracking-widest italic">Aba 'usuario' da Planilha Google</p>
         </div>
         <div className="flex gap-2">
           <button onClick={loadUsers} className="p-4 bg-white border border-gray-200 rounded-2xl text-gray-400 hover:text-[#0b2340] transition-all">
@@ -116,9 +125,9 @@ const UserManagementPage: React.FC<UserManagementPageProps> = ({ onToast }) => {
           {!isAdding && (
             <button 
               onClick={() => setIsAdding(true)}
-              className="px-6 py-4 bg-[#0b2340] text-white rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 shadow-lg hover:bg-blue-900 transition-all"
+              className="px-6 py-4 bg-[#0b2340] text-white rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-lg hover:bg-blue-900 transition-all"
             >
-              <UserPlus className="w-4 h-4" /> Novo Usuário
+              <UserPlus className="w-4 h-4" /> Novo Operador
             </button>
           )}
         </div>
@@ -128,17 +137,17 @@ const UserManagementPage: React.FC<UserManagementPageProps> = ({ onToast }) => {
         <div className="bg-white rounded-[2.5rem] shadow-2xl p-8 border border-gray-100 space-y-8 animate-in slide-in-from-top-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Nome de Usuário</label>
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Usuário</label>
               <input 
                 type="text"
                 value={newUser.username}
                 onChange={e => setNewUser({...newUser, username: e.target.value})}
-                className="w-full px-5 py-4 rounded-2xl border-2 border-gray-100 focus:border-[#0b2340] outline-none font-bold"
-                placeholder="EX: ORGANIZADOR_PFC"
+                className="w-full px-5 py-4 rounded-2xl border-2 border-gray-100 focus:border-[#0b2340] outline-none font-bold uppercase"
+                placeholder="EX: PFC_ANALYST"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Senha de Acesso</label>
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Senha</label>
               <input 
                 type="password"
                 value={newUser.password}
@@ -152,18 +161,18 @@ const UserManagementPage: React.FC<UserManagementPageProps> = ({ onToast }) => {
           <div className="space-y-4">
              <div className="flex items-center justify-between">
                 <h4 className="text-xs font-black text-[#0b2340] uppercase tracking-widest flex items-center gap-2">
-                  <Shield className="w-4 h-4" /> Rotinas e Permissões
+                  <Shield className="w-4 h-4" /> Permissões de Rotina
                 </h4>
                 <button 
                   onClick={() => setNewUser(prev => ({ ...prev, isAdmin: !prev.isAdmin }))}
                   className={`px-4 py-1 rounded-full text-[9px] font-black uppercase transition-all ${newUser.isAdmin ? 'bg-yellow-400 text-white' : 'bg-gray-100 text-gray-400'}`}
                 >
-                  Modo Administrador {newUser.isAdmin ? 'ON' : 'OFF'}
+                  Admin {newUser.isAdmin ? 'ATIVO' : 'DESATIVADO'}
                 </button>
              </div>
             
             {!newUser.isAdmin && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 animate-in fade-in">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {ROUTINES_LIST.map(routine => (
                   <button
                     key={routine.id}
@@ -182,8 +191,8 @@ const UserManagementPage: React.FC<UserManagementPageProps> = ({ onToast }) => {
               </div>
             )}
             {newUser.isAdmin && (
-               <div className="p-6 bg-yellow-50 rounded-2xl border border-yellow-200 text-yellow-800 text-xs font-bold uppercase text-center">
-                  O Administrador possui acesso automático a todas as rotinas do sistema.
+               <div className="p-6 bg-yellow-50 rounded-2xl border border-yellow-200 text-yellow-800 text-[10px] font-black uppercase text-center tracking-widest">
+                  O Administrador tem acesso total e irrestrito ao sistema.
                </div>
             )}
           </div>
@@ -194,11 +203,11 @@ const UserManagementPage: React.FC<UserManagementPageProps> = ({ onToast }) => {
               disabled={loading}
               className="flex-1 py-5 bg-[#0b2340] text-white rounded-[1.5rem] font-black text-sm uppercase tracking-widest hover:bg-blue-900 transition-all shadow-xl disabled:opacity-50"
             >
-              {loading ? 'SINCRONIZANDO...' : 'SALVAR NA PLANILHA'}
+              {loading ? 'SINCRONIZANDO...' : 'CONCLUIR CADASTRO'}
             </button>
             <button 
               onClick={() => setIsAdding(false)}
-              className="px-8 py-5 bg-gray-100 text-gray-400 rounded-[1.5rem] font-black text-sm uppercase tracking-widest hover:bg-gray-200 transition-all"
+              className="px-8 py-5 bg-gray-100 text-gray-400 rounded-[1.5rem] font-black text-xs uppercase tracking-widest hover:bg-gray-200 transition-all"
             >
               CANCELAR
             </button>
@@ -212,14 +221,14 @@ const UserManagementPage: React.FC<UserManagementPageProps> = ({ onToast }) => {
             <tr>
               <th className="px-8 py-6">Usuário</th>
               <th className="px-8 py-6">Nível</th>
-              <th className="px-8 py-6">Rotinas Ativas</th>
-              <th className="px-8 py-6 text-center">Ações</th>
+              <th className="px-8 py-6">Acessos</th>
+              <th className="px-8 py-6 text-center">Remover</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
             {users.length === 0 && !loading ? (
                <tr>
-                 <td colSpan={4} className="p-20 text-center opacity-30 italic font-black uppercase tracking-widest text-xs">Nenhum usuário cadastrado na planilha</td>
+                 <td colSpan={4} className="p-20 text-center opacity-30 italic font-black uppercase tracking-widest text-xs">Aguardando dados...</td>
                </tr>
             ) : (
               users.map(user => (
@@ -229,7 +238,7 @@ const UserManagementPage: React.FC<UserManagementPageProps> = ({ onToast }) => {
                       <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center text-[#0b2340] font-black shadow-inner uppercase">
                         {user.username.charAt(0)}
                       </div>
-                      <span className="font-black text-gray-900 uppercase">{user.username}</span>
+                      <span className="font-black text-gray-900 uppercase text-sm">{user.username}</span>
                     </div>
                   </td>
                   <td className="px-8 py-6">
@@ -257,14 +266,12 @@ const UserManagementPage: React.FC<UserManagementPageProps> = ({ onToast }) => {
                       <button 
                         disabled={loading}
                         onClick={() => handleDelete(user.id)}
-                        className="p-3 text-rose-300 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all disabled:opacity-30"
+                        className="p-3 text-rose-300 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
                       >
                         <Trash2 className="w-5 h-5" />
                       </button>
                     ) : (
-                      <span title="Protegido pelo sistema" className="flex justify-center">
-                        <Shield className="w-5 h-5 text-gray-200" />
-                      </span>
+                      <Shield className="w-5 h-5 text-gray-200 mx-auto" />
                     )}
                   </td>
                 </tr>
