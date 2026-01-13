@@ -15,6 +15,7 @@ const NavMenu: React.FC = () => {
     { to: '/registro/partidas', label: 'Jogos', icon: Swords, routine: 'partidas' },
     { to: '/resultados', label: 'Resumo', icon: CalendarDays, routine: 'resultados' },
     { to: '/dashboard', label: 'Dash', icon: BarChart3, routine: 'dashboard' },
+    { to: '/admin/usuarios', label: 'Acessos', icon: Shield, routine: 'usuarios' },
     { to: '/ajuda', label: 'Ajuda', icon: HelpCircle, routine: 'ajuda' },
   ];
 
