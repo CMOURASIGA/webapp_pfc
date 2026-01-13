@@ -140,9 +140,9 @@ export const getDailyStats = async (dataISO: string): Promise<DailyStats> => {
   }).sort((a, b) => b.gols - a.gols || b.assist - a.assist);
 
   const points = ['T1', 'T2', 'T3', 'T4'].map(t => {
-    const relevant = dailyMatches.filter(m => m.time1 === t || m.time2 === t);
+    const relevant = dailyMatches.filter((m: any) => m.time1 === t || m.time2 === t);
     let pts = 0; let vits = 0; let gm = 0;
-    relevant.forEach(m => {
+    relevant.forEach((m: any) => {
       const isT1 = m.time1 === t;
       const myG = isT1 ? m.gols1 : m.gols2;
       const otG = isT1 ? m.gols2 : m.gols1;
@@ -178,14 +178,14 @@ export const getDashboardData = async (filters: { ano?: number; jogador?: string
   const stats = names.map(nome => {
     const pPlays = filtered.filter((p: any) => p["Jogador"] === nome);
     const presencas = pPlays.length;
-    const gols = pPlays.reduce((sum, p) => sum + (Number(p["Gols"]) || 0), 0);
-    const assist = pPlays.reduce((sum, p) => sum + (Number(p["Assistência"] || p["Assist"]) || 0), 0);
+    const gols = pPlays.reduce((sum: number, p: any) => sum + (Number(p["Gols"]) || 0), 0);
+    const assist = pPlays.reduce((sum: number, p: any) => sum + (Number(p["Assistência"] || p["Assist"]) || 0), 0);
     return { 
       jogador: nome as string, 
       gols, 
       assist, 
       presencas, 
-      vitorias: pPlays.filter(p => p["Capitão"] === 'Sim' || p["Vencedor da rodada"] === 'Sim').length, 
+      vitorias: pPlays.filter((p: any) => p["Capitão"] === 'Sim' || p["Vencedor da rodada"] === 'Sim').length, 
       gRatio: presencas > 0 ? (gols/presencas) : 0, 
       aRatio: presencas > 0 ? (assist/presencas) : 0 
     };
