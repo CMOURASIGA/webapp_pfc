@@ -63,7 +63,7 @@ export interface DashboardData {
 
 // --- NOVOS TIPOS PARA CONTROLE DE ACESSO ---
 
-export type Routine = 'checkin' | 'escalacao' | 'jogadas' | 'partidas' | 'resultados' | 'dashboard' | 'usuarios';
+export type Routine = 'checkin' | 'escalacao' | 'jogadas' | 'partidas' | 'resultados' | 'dashboard' | 'usuarios' | 'ajuda';
 
 export interface User {
   id: string;

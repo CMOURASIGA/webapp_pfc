@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { getTeamAssignmentsByDate, confirmArrival } from '../services/pfcApi';
 import { ToastType } from '../types';
 import { getTodayISO } from '../utils/dateUtils';
-import { UserCheck, Search, ChevronRight, CheckCircle2, ArrowLeft, Send, Users, Calendar } from 'lucide-react';
+import { UserCheck, Search, ChevronRight, CheckCircle2, ArrowLeft, Send, Users, Calendar, Info } from 'lucide-react';
 import LoadingSpinner from '../components/feedback/LoadingSpinner';
 
 interface PlayerCheckInPageProps {
@@ -12,7 +12,7 @@ interface PlayerCheckInPageProps {
 
 const PlayerCheckInPage: React.FC<PlayerCheckInPageProps> = ({ onToast }) => {
   const [step, setStep] = useState(1); 
-  const [data, setData] = useState(getTodayISO()); // Data agora é editável
+  const [data, setData] = useState(getTodayISO());
   const [assignments, setAssignments] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   
@@ -35,7 +35,6 @@ const PlayerCheckInPage: React.FC<PlayerCheckInPageProps> = ({ onToast }) => {
     loadDailyAssignments();
   }, [loadDailyAssignments]);
 
-  // FILTRO: Apenas jogadores escalados para hoje que ainda não chegaram (chegou: false)
   const pendingPlayers = assignments
     .filter(a => !a.chegou)
     .filter(a => a.nome.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -57,6 +56,14 @@ const PlayerCheckInPage: React.FC<PlayerCheckInPageProps> = ({ onToast }) => {
 
   return (
     <div className="max-w-xl mx-auto px-4 py-8 space-y-8">
+      {/* MINI EXPLICAÇÃO */}
+      <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-start gap-3 shadow-sm animate-in fade-in duration-700">
+        <Info className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+        <p className="text-[10px] text-emerald-800 font-black uppercase leading-relaxed tracking-tight">
+          Confirme sua presença aqui para que o organizador saiba que você já está na quadra. Jogadores sem check-in não pontuam por presença.
+        </p>
+      </div>
+
       {/* CABEÇALHO */}
       <div className="text-center space-y-2">
         <div className="w-20 h-20 bg-[#0b2340] rounded-[2rem] flex items-center justify-center mx-auto shadow-2xl rotate-3 mb-6">
@@ -66,7 +73,6 @@ const PlayerCheckInPage: React.FC<PlayerCheckInPageProps> = ({ onToast }) => {
         <p className="text-gray-900 font-bold text-xs uppercase tracking-widest italic">Confirme que você já está na quadra</p>
       </div>
 
-      {/* SELETOR DE DATA (Importante para testes e dias de jogo) */}
       <div className="flex items-center justify-center">
         <div className="flex items-center gap-3 px-6 py-3 bg-white rounded-2xl shadow-sm border border-gray-100 transition-all hover:shadow-md">
           <Calendar className="w-5 h-5 text-[#0b2340]" />
@@ -77,7 +83,7 @@ const PlayerCheckInPage: React.FC<PlayerCheckInPageProps> = ({ onToast }) => {
               value={data} 
               onChange={(e) => {
                 setData(e.target.value);
-                setStep(1); // Reseta se mudar a data
+                setStep(1);
               }}
               className="bg-transparent text-sm font-black text-black outline-none cursor-pointer"
             />
@@ -85,7 +91,6 @@ const PlayerCheckInPage: React.FC<PlayerCheckInPageProps> = ({ onToast }) => {
         </div>
       </div>
 
-      {/* PASSO 1: QUEM FOI ESCALADO? */}
       {step === 1 && (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
           <div className="bg-white rounded-[2.5rem] shadow-2xl border border-gray-100 p-8">
@@ -133,7 +138,6 @@ const PlayerCheckInPage: React.FC<PlayerCheckInPageProps> = ({ onToast }) => {
         </div>
       )}
 
-      {/* PASSO 2: CONFIRMAÇÃO */}
       {step === 2 && (
         <div className="space-y-6 animate-in zoom-in-95 duration-300">
            <button 
@@ -163,7 +167,6 @@ const PlayerCheckInPage: React.FC<PlayerCheckInPageProps> = ({ onToast }) => {
         </div>
       )}
 
-      {/* PASSO 3: SUCESSO */}
       {step === 3 && (
         <div className="text-center space-y-8 animate-in zoom-in duration-500">
           <div className="w-32 h-32 bg-emerald-500 rounded-full flex items-center justify-center mx-auto shadow-[0_0_50px_rgba(16,185,129,0.4)] animate-pulse">

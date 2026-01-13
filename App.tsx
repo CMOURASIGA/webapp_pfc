@@ -9,6 +9,7 @@ import DashboardPage from './pages/DashboardPage';
 import TeamSetupPage from './pages/TeamSetupPage';
 import PlayerCheckInPage from './pages/PlayerCheckInPage';
 import UserManagementPage from './pages/UserManagementPage';
+import HelpPage from './pages/HelpPage';
 import LoginPage from './pages/LoginPage';
 import ToastContainer from './components/feedback/ToastContainer';
 import { ToastMessage, ToastType, Routine } from './types';
@@ -24,7 +25,6 @@ const ProtectedRoute = ({ children, routine }: { children: React.ReactElement, r
   }
 
   if (!hasPermission(user, routine)) {
-    // Redireciona para a primeira rotina que ele tem acesso
     return <Navigate to="/" replace />;
   }
 
@@ -58,7 +58,6 @@ const App: React.FC = () => {
         
         <Route path="/" element={
           currentUser ? (
-            // Redireciona para a primeira permissão disponível ou dashboard
             <Navigate to="/checkin" replace />
           ) : (
             <Navigate to="/login" replace />
@@ -118,6 +117,14 @@ const App: React.FC = () => {
           element={
             <ProtectedRoute routine="usuarios">
               <MainLayout><UserManagementPage onToast={addToast} /></MainLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/ajuda" 
+          element={
+            <ProtectedRoute routine="ajuda">
+              <MainLayout><HelpPage /></MainLayout>
             </ProtectedRoute>
           } 
         />

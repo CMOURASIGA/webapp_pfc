@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { ClipboardList, Swords, CalendarDays, BarChart3, UsersRound, UserCheck, Shield } from 'lucide-react';
+import { ClipboardList, Swords, CalendarDays, BarChart3, UsersRound, UserCheck, Shield, HelpCircle } from 'lucide-react';
 import { getCurrentUser, hasPermission } from '../../services/authService';
 import { Routine } from '../../types';
 
@@ -16,6 +16,7 @@ const NavMenu: React.FC = () => {
     { to: '/resultados', label: 'Resultados', icon: CalendarDays, routine: 'resultados' },
     { to: '/dashboard', label: 'Dashboard', icon: BarChart3, routine: 'dashboard' },
     { to: '/admin/usuarios', label: 'Acessos', icon: Shield, routine: 'usuarios' },
+    { to: '/ajuda', label: 'Ajuda', icon: HelpCircle, routine: 'ajuda' },
   ];
 
   // Filtra abas baseado no usuário logado
