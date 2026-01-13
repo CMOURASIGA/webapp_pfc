@@ -1,8 +1,8 @@
 
 import { DailyStats, DashboardData, Match, PlayerPlay, User } from '../types';
 
-// URL fornecida pelo usuário
-const API_URL = 'https://script.google.com/macros/s/AKfycbyREKLkLQLFA871c24j-N_gYd0XgVo7kW2J6CbPYWEMHQcwQOQQteg9Vw4DCxJHd25f/exec'; 
+// Tenta obter a URL da variável de ambiente, senão usa o fallback
+const API_URL = (import.meta as any).env?.VITE_API_URL || 'https://script.google.com/macros/s/AKfycbyREKLkLQLFA871c24j-N_gYd0XgVo7kW2J6CbPYWEMHQcwQOQQteg9Vw4DCxJHd25f/exec'; 
 
 let cachedInitialData: any = null;
 let lastFetchTime = 0;
@@ -72,6 +72,7 @@ const fetchFullData = async (forceRefresh = false) => {
     lastFetchTime = Date.now();
     return data;
   } catch (e) {
+    console.error("[API] Erro ao buscar dados:", e);
     return cachedInitialData || { players: [], plays: [], matches: [], teamAssignments: [], users: [] };
   }
 };
@@ -157,7 +158,7 @@ export const getDailyStats = async (dataISO: string): Promise<DailyStats> => {
     jogos: dailyMatches, 
     statsJogadores, 
     pontosTimes: points, 
-    campeaoDoDia: [...points].sort((a,b) => b.pontos - a.pontos || b.golsMarcados - a.golsMarcados)[0]?.time || 'N/A' 
+    campeaoDoDia: [...points].sort((a: any, b: any) => b.pontos - a.pontos || b.golsMarcados - a.golsMarcados)[0]?.time || 'N/A' 
   };
 };
 
