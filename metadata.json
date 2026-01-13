@@ -1,0 +1,5 @@
+{
+  "name": "Pelada PFC Manager",
+  "description": "A comprehensive soccer match and player statistics tracker for local 'pelada' groups, featuring registration of plays, matches, and interactive performance dashboards.",
+  "requestFramePermissions": []
+}
