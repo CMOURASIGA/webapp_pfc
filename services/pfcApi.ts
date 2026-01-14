@@ -208,18 +208,19 @@ export const getDashboardData = async (filters: { ano?: number; jogador?: string
     };
   });
 
+  // Aumentado slice para 50 para suportar a tela de Scout Anual completa
   return {
-    rankingGols: [...stats].sort((a,b) => b.gols - a.gols).slice(0, 10).map(s => ({ name: s.jogador, value: s.gols })),
-    rankingAssist: [...stats].sort((a,b) => b.assist - a.assist).slice(0, 10).map(s => ({ name: s.jogador, value: s.assist })),
-    rankingGolsAssist: [...stats].sort((a,b) => b.totalGA - a.totalGA).slice(0, 10).map(s => ({ 
+    rankingGols: [...stats].sort((a,b) => b.gols - a.gols).slice(0, 50).map(s => ({ name: s.jogador, value: s.gols })),
+    rankingAssist: [...stats].sort((a,b) => b.assist - a.assist).slice(0, 50).map(s => ({ name: s.jogador, value: s.assist })),
+    rankingGolsAssist: [...stats].sort((a,b) => b.totalGA - a.totalGA).slice(0, 50).map(s => ({ 
       name: s.jogador, 
       value: s.totalGA,
       displayValue: `${s.gols} Gols / ${s.assist} Ast`
     })),
-    presencaGols: [...stats].sort((a,b) => b.gRatio - a.gRatio).slice(0, 5).map(s => ({ jogador: s.jogador, presencas: s.presencas, gols: s.gols, ratio: Number(s.gRatio.toFixed(2)) })),
-    presencaAssist: [...stats].sort((a,b) => b.aRatio - a.aRatio).slice(0, 5).map(s => ({ jogador: s.jogador, presencas: s.presencas, assistencias: s.assist, ratio: Number(s.aRatio.toFixed(2)) })),
-    nivelPresenca: [...stats].sort((a,b) => b.presencas - a.presencas).slice(0, 5).map(s => ({ jogador: s.jogador, presencas: s.presencas })),
-    maioresVencedores: [...stats].sort((a,b) => b.vitorias - a.vitorias).slice(0, 10).map(s => ({ jogador: s.jogador, vitorias: s.vitorias })),
+    presencaGols: [...stats].sort((a,b) => b.gRatio - a.gRatio).slice(0, 10).map(s => ({ jogador: s.jogador, presencas: s.presencas, gols: s.gols, ratio: Number(s.gRatio.toFixed(2)) })),
+    presencaAssist: [...stats].sort((a,b) => b.aRatio - a.aRatio).slice(0, 10).map(s => ({ jogador: s.jogador, presencas: s.presencas, assistencias: s.assist, ratio: Number(s.aRatio.toFixed(2)) })),
+    nivelPresenca: [...stats].sort((a,b) => b.presencas - a.presencas).slice(0, 50).map(s => ({ jogador: s.jogador, presencas: s.presencas })),
+    maioresVencedores: [...stats].sort((a,b) => b.vitorias - a.vitorias).slice(0, 50).map(s => ({ jogador: s.jogador, vitorias: s.vitorias })),
     ultimaRodada: { melhorAssist: { jogador: "N/A", value: 0 }, artilheiro: { jogador: "N/A", value: 0 }, rankingAssist: [], rankingGols: [] }
   };
 };

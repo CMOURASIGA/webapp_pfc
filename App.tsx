@@ -6,6 +6,7 @@ import RegisterPlayPage from './pages/RegisterPlayPage';
 import RegisterMatchPage from './pages/RegisterMatchPage';
 import DailyResultsPage from './pages/DailyResultsPage';
 import DashboardPage from './pages/DashboardPage';
+import AnnualScoutPage from './pages/AnnualScoutPage';
 import TeamSetupPage from './pages/TeamSetupPage';
 import PlayerCheckInPage from './pages/PlayerCheckInPage';
 import UserManagementPage from './pages/UserManagementPage';
@@ -15,9 +16,6 @@ import ToastContainer from './components/feedback/ToastContainer';
 import { ToastMessage, ToastType, Routine } from './types';
 import { getCurrentUser, hasPermission } from './services/authService';
 
-// Componente para proteção de rotas
-// Fixed: Changed children to be optional in the type definition to resolve TypeScript errors
-// where children were not being correctly identified as present in some build environments.
 const ProtectedRoute = ({ children, routine }: { children?: React.ReactNode, routine: Routine }) => {
   const user = getCurrentUser();
   const location = useLocation();
@@ -103,6 +101,14 @@ const App: React.FC = () => {
           element={
             <ProtectedRoute routine="resultados">
               <MainLayout><DailyResultsPage /></MainLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/scout/anual" 
+          element={
+            <ProtectedRoute routine="scout_anual">
+              <MainLayout><AnnualScoutPage /></MainLayout>
             </ProtectedRoute>
           } 
         />

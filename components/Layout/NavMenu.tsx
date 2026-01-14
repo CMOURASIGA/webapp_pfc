@@ -3,7 +3,8 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
   ClipboardList, Swords, CalendarDays, BarChart3, 
-  UsersRound, UserCheck, Shield, HelpCircle, X 
+  UsersRound, UserCheck, Shield, HelpCircle, X,
+  LayoutGrid
 } from 'lucide-react';
 import { getCurrentUser, hasPermission } from '../../services/authService';
 import { Routine } from '../../types';
@@ -23,6 +24,7 @@ const NavMenu: React.FC<NavMenuProps> = ({ isOpen, onClose }) => {
     { to: '/registro/jogadas', label: 'Lançar Gols', icon: ClipboardList, routine: 'jogadas' },
     { to: '/registro/partidas', label: 'Placar Jogos', icon: Swords, routine: 'partidas' },
     { to: '/resultados', label: 'Resumo Rodada', icon: CalendarDays, routine: 'resultados' },
+    { to: '/scout/anual', label: 'Scout Anual', icon: LayoutGrid, routine: 'scout_anual' },
     { to: '/dashboard', label: 'Dashboard Anual', icon: BarChart3, routine: 'dashboard' },
     { to: '/admin/usuarios', label: 'Gestão Acessos', icon: Shield, routine: 'usuarios' },
     { to: '/ajuda', label: 'Ajuda e Guia', icon: HelpCircle, routine: 'ajuda' },
@@ -83,7 +85,6 @@ const NavMenu: React.FC<NavMenuProps> = ({ isOpen, onClose }) => {
                     {tab.label}
                   </span>
                   
-                  {/* Tooltip para versão colapsada no Desktop */}
                   {!isOpen && (
                     <div className="absolute left-full ml-4 px-3 py-2 bg-gray-900 text-white text-[9px] font-black uppercase tracking-widest rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity hidden lg:block whitespace-nowrap z-50">
                       {tab.label}
@@ -95,10 +96,9 @@ const NavMenu: React.FC<NavMenuProps> = ({ isOpen, onClose }) => {
           ))}
         </nav>
 
-        {/* Rodapé da Sidebar */}
         <div className="p-6 border-t border-white/10 shrink-0">
            <div className={`flex flex-col gap-1 transition-opacity duration-300 ${!isOpen && 'lg:opacity-0 xl:opacity-100'}`}>
-              <span className="text-[8px] font-black text-gray-500 uppercase tracking-[0.2em]">Versão 4.0.2</span>
+              <span className="text-[8px] font-black text-gray-500 uppercase tracking-[0.2em]">Versão 4.2.0</span>
               <span className="text-[8px] font-black text-blue-400 uppercase tracking-widest">PFC Cloud Sync</span>
            </div>
         </div>
