@@ -9,4 +9,5 @@ export const COLORS = {
 
 export const TEAMS = ['T1', 'T2', 'T3', 'T4'];
 
-export const DASHBOARD_YEARS = [2023, 2024, 2025];
+// Atualizado para incluir os anos atuais e futuros de atividade do PFC
+export const DASHBOARD_YEARS = [2023, 2024, 2025, 2026, 2027];

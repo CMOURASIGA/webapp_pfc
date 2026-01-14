@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 
 const DashboardPage: React.FC = () => {
+  // Inicia sempre com o último ano da lista (o mais recente)
   const [filters, setFilters] = useState<{ ano: number; jogador: string }>({
     ano: DASHBOARD_YEARS[DASHBOARD_YEARS.length - 1],
     jogador: 'Todos'
@@ -97,7 +98,6 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className="space-y-12 pb-24">
-      {/* MINI EXPLICAÇÃO */}
       <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4 flex items-start gap-3 shadow-sm animate-in fade-in duration-1000">
         <Info className="w-5 h-5 text-orange-600 shrink-0 mt-0.5" />
         <p className="text-[10px] text-orange-800 font-black uppercase leading-relaxed tracking-tight">
