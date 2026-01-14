@@ -49,6 +49,7 @@ export interface RankingItem {
 export interface DashboardData {
   rankingGols: RankingItem[];
   rankingAssist: RankingItem[];
+  rankingGolsAssist: RankingItem[];
   presencaGols: { jogador: string; presencas: number; gols: number; ratio: number }[];
   presencaAssist: { jogador: string; presencas: number; assistencias: number; ratio: number }[];
   nivelPresenca: { jogador: string; presencas: number }[];

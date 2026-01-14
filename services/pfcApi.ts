@@ -12,7 +12,6 @@ const parseToIso = (dateVal: any): string => {
   if (!dateVal) return "";
   let dateStr = dateVal.toString().trim();
   
-  // Trata objetos Date vindos do Google Sheets via JSON
   if (dateStr.length > 15 && dateStr.includes(' ') && !dateStr.includes('/')) {
     try {
       const d = new Date(dateStr);
@@ -22,12 +21,10 @@ const parseToIso = (dateVal: any): string => {
     } catch(e) {}
   }
 
-  // Trata formato ISO (YYYY-MM-DD)
   if (dateStr.includes('-') && dateStr.indexOf('-') === 4) {
     return dateStr.split('T')[0];
   }
   
-  // Trata formato brasileiro (DD/MM/YYYY) vindo da Coluna C
   if (dateStr.includes('/')) {
     const parts = dateStr.split(' ')[0].split('/');
     if (parts.length === 3) {
@@ -80,17 +77,14 @@ const fetchFullData = async (forceRefresh = false) => {
   }
 };
 
-// --- USUÁRIOS ---
 export const getUsuariosPlanilha = async (): Promise<User[]> => {
   const data = await fetchFullData();
   return data.users || [];
 };
 
 export const saveUsuarioPlanilha = async (user: User) => sendPost('saveUser', user);
-
 export const deleteUsuarioPlanilha = async (userId: string) => sendPost('deleteUser', { id: userId });
 
-// --- OUTROS ---
 export const getJogadores = async (): Promise<string[]> => {
   const data = await fetchFullData();
   return (data.players || []).filter(Boolean).sort();
@@ -130,7 +124,6 @@ export const getDailyStats = async (dataISO: string): Promise<DailyStats> => {
     gols2: Number(m.gols2) || 0
   })).filter((m: any) => m.dataISO === dataISO);
 
-  // CRÍTICO: Filtra usando estritamente a chave "Data do Jogo" (Coluna C da Planilha)
   const dailyPlays = plays.filter((p: any) => parseToIso(p["Data do Jogo"]) === dataISO);
   
   const statsJogadores = Array.from(new Set(dailyPlays.map((p: any) => p["Jogador"]))).map(nome => {
@@ -168,39 +161,64 @@ export const getDailyStats = async (dataISO: string): Promise<DailyStats> => {
 
 export const getRawPlaysByDate = async (dataISO: string): Promise<any[]> => {
   const json = await fetchFullData(true);
-  // CRÍTICO: Filtra usando estritamente a chave "Data do Jogo" (Coluna C da Planilha)
   return (json.plays || []).filter((p: any) => parseToIso(p["Data do Jogo"]) === dataISO);
 };
 
 export const getDashboardData = async (filters: { ano?: number; jogador?: string }): Promise<DashboardData> => {
   const json = await fetchFullData();
   const plays = json.plays || [];
-  const filtered = plays.filter((p: any) => {
-    // CRÍTICO: Busca data da Coluna C
+  const assignments = json.teamAssignments || [];
+  
+  // 1. Filtrar participações da aba 'times' pelo ano (fonte confiável de presença)
+  const filteredAssignments = assignments.filter((a: any) => {
+    const date = parseToIso(a.data);
+    return filters.ano ? new Date(date).getUTCFullYear() === filters.ano : true;
+  });
+
+  // Mapa de presenças: Nome -> Quantidade de Datas Escaladas
+  const presenceMap: Record<string, number> = {};
+  filteredAssignments.forEach((a: any) => {
+    const nome = a.nome?.toString().toUpperCase().trim();
+    if (nome) presenceMap[nome] = (presenceMap[nome] || 0) + 1;
+  });
+
+  // 2. Filtrar jogadas pelo ano para Gols e Assistências
+  const filteredPlays = plays.filter((p: any) => {
     const date = parseToIso(p["Data do Jogo"]);
     return filters.ano ? new Date(date).getUTCFullYear() === filters.ano : true;
   });
   
-  const names = Array.from(new Set(filtered.map((p: any) => p["Jogador"]))).filter(Boolean);
-  const stats = names.map(nome => {
-    const pPlays = filtered.filter((p: any) => p["Jogador"] === nome);
-    const presencas = pPlays.length;
+  // Obter lista única de todos os jogadores que tiveram presença OU jogada no ano
+  const allNames = Array.from(new Set([
+    ...Object.keys(presenceMap),
+    ...filteredPlays.map((p: any) => p["Jogador"]?.toString().toUpperCase().trim())
+  ])).filter(Boolean);
+
+  const stats = allNames.map(nome => {
+    const pPlays = filteredPlays.filter((p: any) => p["Jogador"]?.toString().toUpperCase().trim() === nome);
+    const presencas = presenceMap[nome] || 0;
     const gols = pPlays.reduce((sum: number, p: any) => sum + (Number(p["Gols"]) || 0), 0);
     const assist = pPlays.reduce((sum: number, p: any) => sum + (Number(p["Assistência"] || p["Assist"]) || 0), 0);
+    
     return { 
       jogador: nome as string, 
       gols, 
       assist, 
       presencas, 
+      totalGA: gols + assist,
       vitorias: pPlays.filter((p: any) => p["Capitão"] === 'Sim' || p["Vencedor da rodada"] === 'Sim').length, 
       gRatio: presencas > 0 ? (gols/presencas) : 0, 
       aRatio: presencas > 0 ? (assist/presencas) : 0 
     };
   });
 
+  // Se houver um filtro de jogador específico, poderíamos filtrar aqui, 
+  // mas o dashboard geralmente exibe rankings comparativos.
+
   return {
     rankingGols: [...stats].sort((a,b) => b.gols - a.gols).slice(0, 10).map(s => ({ name: s.jogador, value: s.gols })),
     rankingAssist: [...stats].sort((a,b) => b.assist - a.assist).slice(0, 10).map(s => ({ name: s.jogador, value: s.assist })),
+    rankingGolsAssist: [...stats].sort((a,b) => b.totalGA - a.totalGA).slice(0, 10).map(s => ({ name: s.jogador, value: s.totalGA })),
     presencaGols: [...stats].sort((a,b) => b.gRatio - a.gRatio).slice(0, 5).map(s => ({ jogador: s.jogador, presencas: s.presencas, gols: s.gols, ratio: Number(s.gRatio.toFixed(2)) })),
     presencaAssist: [...stats].sort((a,b) => b.aRatio - a.aRatio).slice(0, 5).map(s => ({ jogador: s.jogador, presencas: s.presencas, assistencias: s.assist, ratio: Number(s.aRatio.toFixed(2)) })),
     nivelPresenca: [...stats].sort((a,b) => b.presencas - a.presencas).slice(0, 5).map(s => ({ jogador: s.jogador, presencas: s.presencas })),

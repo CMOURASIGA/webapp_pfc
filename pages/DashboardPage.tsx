@@ -11,11 +11,11 @@ import StatCard from '../components/stats/StatCard';
 import { 
   Filter, Users, Trophy, Award, TrendingUp, Calendar, 
   ChevronDown, Target, Zap, Star, Crown, Flame, 
-  TrendingDown, Activity, Medal, BarChart3, Info
+  TrendingDown, Activity, Medal, BarChart3, Info,
+  HelpCircle, Share2, MessageSquare
 } from 'lucide-react';
 
 const DashboardPage: React.FC = () => {
-  // Inicializa sempre com o ano da data atual
   const [filters, setFilters] = useState<{ ano: number; jogador: string }>({
     ano: new Date().getFullYear(),
     jogador: 'Todos'
@@ -46,7 +46,28 @@ const DashboardPage: React.FC = () => {
     fetchDashboard();
   }, [filters]);
 
-  const Podium = ({ title, data, colorClass }: { title: string, data: any[], colorClass: string }) => {
+  const handleShareWhatsApp = () => {
+    if (!data) return;
+
+    const topArtilheiro = data.rankingGols[0]?.name || "N/A";
+    const topGarcom = data.rankingAssist[0]?.name || "N/A";
+    const topElite = data.rankingGolsAssist[0]?.name || "N/A";
+
+    const text = `*📊 PELADA PFC - RESUMO DA TEMPORADA ${filters.ano}*
+
+🏆 *Líderes de Elite:*
+⚽ *Artilheiro:* ${topArtilheiro} (${data.rankingGols[0]?.value || 0} gols)
+🅰️ *Garçom:* ${topGarcom} (${data.rankingAssist[0]?.value || 0} assistências)
+🔥 *Multifuncional (G+A):* ${topElite} (${data.rankingGolsAssist[0]?.value || 0} participações)
+
+Confira o ranking completo no nosso Dashboard Pro:
+${window.location.origin}${window.location.pathname}#/dashboard`;
+
+    const encodedText = encodeURIComponent(text);
+    window.open(`https://wa.me/?text=${encodedText}`, '_blank');
+  };
+
+  const Podium = ({ title, data, colorClass, description }: { title: string, data: any[], colorClass: string, description: string }) => {
     if (!data || data.length < 1) return null;
     const top1 = data[0];
     const top2 = data[1];
@@ -55,8 +76,8 @@ const DashboardPage: React.FC = () => {
     return (
       <div className="bg-white rounded-[2.5rem] p-6 lg:p-8 shadow-xl border border-gray-100 flex flex-col items-center w-full">
         <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-12 text-center">{title}</h3>
-        <div className="flex items-end gap-2 sm:gap-4 w-full justify-center">
-          
+        
+        <div className="flex items-end gap-2 sm:gap-4 w-full justify-center mb-8">
           {/* 2º LUGAR */}
           {top2 && (
             <div className="flex flex-col items-center group w-[90px] sm:w-[120px]">
@@ -80,7 +101,7 @@ const DashboardPage: React.FC = () => {
               <span className="text-2xl">{top1.name.charAt(0)}</span>
             </div>
             <div className={`${colorClass} w-full rounded-t-3xl flex flex-col items-center py-6 px-1 h-40 shadow-xl relative`}>
-              <span className="text-[10px] font-black text-white/50 uppercase mb-1 tracking-widest">Vencedor</span>
+              <span className="text-[10px] font-black text-white/50 uppercase mb-1 tracking-widest">LÍDER</span>
               <span className="text-[10px] sm:text-xs font-black text-white break-words w-full text-center leading-[1.1] uppercase mb-2">
                 {top1.name}
               </span>
@@ -104,6 +125,13 @@ const DashboardPage: React.FC = () => {
             </div>
           )}
         </div>
+
+        <div className="mt-4 pt-4 border-t border-gray-50 w-full flex items-start gap-2">
+           <HelpCircle className="w-3.5 h-3.5 text-gray-300 shrink-0 mt-0.5" />
+           <p className="text-[8px] font-bold text-gray-400 uppercase leading-tight tracking-tight">
+             {description}
+           </p>
+        </div>
       </div>
     );
   };
@@ -126,12 +154,23 @@ const DashboardPage: React.FC = () => {
           <div className="space-y-4">
             <div className="inline-flex items-center gap-2 bg-blue-500/20 px-4 py-1.5 rounded-full border border-blue-400/30 backdrop-blur-md">
               <Activity className="w-4 h-4 text-blue-400" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-blue-300">Analytics Pro v3.0</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-blue-300">Analytics Pro v4.0</span>
             </div>
             <h1 className="text-5xl lg:text-7xl font-black tracking-tighter uppercase leading-[0.9]">
               Painel de <br /> <span className="text-blue-400">Resultados</span>
             </h1>
             <p className="text-gray-400 font-bold uppercase tracking-widest text-xs italic">Acompanhe a evolução histórica da Pelada PFC</p>
+            
+            {/* Botão de Compartilhar */}
+            <div className="pt-4">
+               <button 
+                onClick={handleShareWhatsApp}
+                className="inline-flex items-center gap-3 bg-[#25D366] hover:bg-[#128C7E] text-white px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-[0_10px_30px_rgba(37,211,102,0.3)] group active:scale-95"
+              >
+                <MessageSquare className="w-4 h-4 group-hover:rotate-12 transition-transform" />
+                Compartilhar no WhatsApp
+              </button>
+            </div>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4">
@@ -183,9 +222,24 @@ const DashboardPage: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <Podium title="Ranking de Artilharia" data={data.rankingGols} colorClass="bg-rose-500" />
-              <Podium title="Ranking de Assistências" data={data.rankingAssist} colorClass="bg-blue-500" />
-              <Podium title="Dominadores de Rodadas" data={data.maioresVencedores.map(m => ({ name: m.jogador, value: m.vitorias }))} colorClass="bg-emerald-500" />
+              <Podium 
+                title="Ranking de Artilharia" 
+                data={data.rankingGols} 
+                colorClass="bg-rose-500" 
+                description="Soma total de gols marcados pelo atleta durante todas as rodadas do ano."
+              />
+              <Podium 
+                title="Ranking de Assistências" 
+                data={data.rankingAssist} 
+                colorClass="bg-blue-500" 
+                description="Soma total de passes para gol realizados pelo atleta na temporada."
+              />
+              <Podium 
+                title="Elite Multifuncional" 
+                data={data.rankingGolsAssist} 
+                colorClass="bg-emerald-500" 
+                description="Ranking de Contribuição Total (Gols + Assistências). Identifica o jogador mais influente na criação e finalização de jogadas."
+              />
             </div>
           </section>
 
