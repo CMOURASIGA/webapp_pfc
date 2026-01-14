@@ -16,7 +16,9 @@ import { ToastMessage, ToastType, Routine } from './types';
 import { getCurrentUser, hasPermission } from './services/authService';
 
 // Componente para proteção de rotas
-const ProtectedRoute = ({ children, routine }: { children: React.ReactElement, routine: Routine }) => {
+// Fixed: Changed children to be optional in the type definition to resolve TypeScript errors
+// where children were not being correctly identified as present in some build environments.
+const ProtectedRoute = ({ children, routine }: { children?: React.ReactNode, routine: Routine }) => {
   const user = getCurrentUser();
   const location = useLocation();
 
@@ -28,7 +30,7 @@ const ProtectedRoute = ({ children, routine }: { children: React.ReactElement, r
     return <Navigate to="/" replace />;
   }
 
-  return children;
+  return <>{children}</>;
 };
 
 const App: React.FC = () => {
