@@ -15,9 +15,9 @@ import {
 } from 'lucide-react';
 
 const DashboardPage: React.FC = () => {
-  // Inicia sempre com o último ano da lista (o mais recente)
+  // Inicializa sempre com o ano da data atual
   const [filters, setFilters] = useState<{ ano: number; jogador: string }>({
-    ano: DASHBOARD_YEARS[DASHBOARD_YEARS.length - 1],
+    ano: new Date().getFullYear(),
     jogador: 'Todos'
   });
   const [data, setData] = useState<DashboardData | null>(null);
@@ -53,41 +53,53 @@ const DashboardPage: React.FC = () => {
     const top3 = data[2];
 
     return (
-      <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-gray-100 flex flex-col items-center">
-        <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-10">{title}</h3>
-        <div className="flex items-end gap-2 w-full justify-center">
+      <div className="bg-white rounded-[2.5rem] p-6 lg:p-8 shadow-xl border border-gray-100 flex flex-col items-center w-full">
+        <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-12 text-center">{title}</h3>
+        <div className="flex items-end gap-2 sm:gap-4 w-full justify-center">
+          
+          {/* 2º LUGAR */}
           {top2 && (
-            <div className="flex flex-col items-center group">
+            <div className="flex flex-col items-center group w-[90px] sm:w-[120px]">
               <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center font-black text-gray-400 border-2 border-white shadow-md mb-2 group-hover:scale-110 transition-transform">
                 {top2.name.charAt(0)}
               </div>
-              <div className="w-16 bg-gray-200 rounded-t-xl flex flex-col items-center py-4 px-2 h-20 shadow-inner">
-                <span className="text-[10px] font-black text-gray-500 uppercase">2º</span>
-                <span className="text-xs font-black text-gray-900 truncate w-full text-center">{top2.value}</span>
+              <div className="w-full bg-gray-200 rounded-t-2xl flex flex-col items-center py-4 px-1 h-24 shadow-inner">
+                <span className="text-[9px] font-black text-gray-500 uppercase mb-1">2º</span>
+                <span className="text-[9px] sm:text-[10px] font-black text-gray-900 break-words w-full text-center leading-[1.1] uppercase mb-1">
+                  {top2.name}
+                </span>
+                <span className="text-xs font-black text-gray-600 mt-auto">{top2.value}</span>
               </div>
             </div>
           )}
           
-          <div className="flex flex-col items-center group -translate-y-4">
+          {/* 1º LUGAR */}
+          <div className="flex flex-col items-center group -translate-y-4 w-[110px] sm:w-[150px]">
             <div className={`w-20 h-20 ${colorClass} rounded-3xl flex items-center justify-center font-black text-white border-4 border-white shadow-2xl mb-2 relative group-hover:scale-110 transition-transform`}>
               <Crown className="absolute -top-6 w-8 h-8 text-yellow-400 fill-yellow-400 drop-shadow-md animate-bounce" />
               <span className="text-2xl">{top1.name.charAt(0)}</span>
             </div>
-            <div className={`${colorClass} w-24 rounded-t-2xl flex flex-col items-center py-6 px-2 h-32 shadow-xl`}>
-              <span className="text-[10px] font-black text-white/50 uppercase">Vencedor</span>
-              <span className="text-sm font-black text-white truncate w-full text-center">{top1.name}</span>
-              <span className="text-xl font-black text-white mt-1">{top1.value}</span>
+            <div className={`${colorClass} w-full rounded-t-3xl flex flex-col items-center py-6 px-1 h-40 shadow-xl relative`}>
+              <span className="text-[10px] font-black text-white/50 uppercase mb-1 tracking-widest">Vencedor</span>
+              <span className="text-[10px] sm:text-xs font-black text-white break-words w-full text-center leading-[1.1] uppercase mb-2">
+                {top1.name}
+              </span>
+              <span className="text-2xl font-black text-white mt-auto">{top1.value}</span>
             </div>
           </div>
 
+          {/* 3º LUGAR */}
           {top3 && (
-            <div className="flex flex-col items-center group">
+            <div className="flex flex-col items-center group w-[90px] sm:w-[120px]">
               <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center font-black text-gray-400 border-2 border-white shadow-md mb-2 group-hover:scale-110 transition-transform">
                 {top3.name.charAt(0)}
               </div>
-              <div className="w-16 bg-gray-100 rounded-t-xl flex flex-col items-center py-4 px-2 h-16 shadow-inner">
-                <span className="text-[10px] font-black text-gray-400 uppercase">3º</span>
-                <span className="text-xs font-black text-gray-900 truncate w-full text-center">{top3.value}</span>
+              <div className="w-full bg-gray-100 rounded-t-2xl flex flex-col items-center py-4 px-1 h-20 shadow-inner">
+                <span className="text-[9px] font-black text-gray-400 uppercase mb-1">3º</span>
+                <span className="text-[9px] sm:text-[10px] font-black text-gray-900 break-words w-full text-center leading-[1.1] uppercase mb-1">
+                  {top3.name}
+                </span>
+                <span className="text-xs font-black text-gray-600 mt-auto">{top3.value}</span>
               </div>
             </div>
           )}
@@ -198,7 +210,7 @@ const DashboardPage: React.FC = () => {
                         <span className="text-4xl font-black">{data.presencaGols[0]?.ratio || 0}</span>
                         <span className="text-xs font-bold text-gray-500 uppercase">Gols/Jogo</span>
                       </div>
-                      <p className="text-[10px] font-black text-rose-300 mt-2 uppercase">{data.presencaGols[0]?.jogador}</p>
+                      <p className="text-[10px] font-black text-rose-300 mt-2 uppercase break-words leading-tight">{data.presencaGols[0]?.jogador}</p>
                     </div>
 
                     <div className="bg-white/5 p-6 rounded-[2rem] border border-white/10 hover:bg-white/10 transition-colors">
@@ -210,7 +222,7 @@ const DashboardPage: React.FC = () => {
                         <span className="text-4xl font-black">{data.presencaAssist[0]?.ratio || 0}</span>
                         <span className="text-xs font-bold text-gray-500 uppercase">Ast/Jogo</span>
                       </div>
-                      <p className="text-[10px] font-black text-sky-300 mt-2 uppercase">{data.presencaAssist[0]?.jogador}</p>
+                      <p className="text-[10px] font-black text-sky-300 mt-2 uppercase break-words leading-tight">{data.presencaAssist[0]?.jogador}</p>
                     </div>
                   </div>
                </div>
@@ -294,9 +306,9 @@ const DashboardPage: React.FC = () => {
                       <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center font-black text-emerald-600">
                         {p.jogador.charAt(0)}
                       </div>
-                      <span className="font-black uppercase text-sm">{p.jogador}</span>
+                      <span className="font-black uppercase text-sm break-words leading-tight">{p.jogador}</span>
                     </div>
-                    <span className="text-xl font-black">{p.presencas} J</span>
+                    <span className="text-xl font-black shrink-0">{p.presencas} J</span>
                   </div>
                 ))}
               </div>

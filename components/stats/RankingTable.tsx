@@ -60,13 +60,13 @@ const RankingTable: React.FC<RankingTableProps> = ({ columns, data, progressKey,
                   </span>
                 </td>
                 {columns.map(col => (
-                  <td key={col.key} className={`px-6 py-6 font-black text-gray-900 text-sm uppercase ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}`}>
+                  <td key={col.key} className={`px-6 py-6 font-black text-gray-900 text-sm uppercase leading-[1.2] ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}`}>
                     {row[col.key]}
                   </td>
                 ))}
                 {progressKey && (
                   <td className="px-6 py-6">
-                    <div className="flex items-center justify-end gap-3">
+                    <div className="flex items-center justify-end gap-3 min-w-[120px]">
                        <div className="w-24 bg-gray-100 rounded-full h-1.5 overflow-hidden">
                         <div 
                           className="bg-gradient-to-r from-[#0b2340] to-blue-500 h-full rounded-full transition-all duration-1000 ease-out"
