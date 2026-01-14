@@ -12,6 +12,7 @@ const parseToIso = (dateVal: any): string => {
   if (!dateVal) return "";
   let dateStr = dateVal.toString().trim();
   
+  // Trata objetos Date vindos do Google Sheets via JSON
   if (dateStr.length > 15 && dateStr.includes(' ') && !dateStr.includes('/')) {
     try {
       const d = new Date(dateStr);
@@ -21,10 +22,12 @@ const parseToIso = (dateVal: any): string => {
     } catch(e) {}
   }
 
+  // Trata formato ISO (YYYY-MM-DD)
   if (dateStr.includes('-') && dateStr.indexOf('-') === 4) {
     return dateStr.split('T')[0];
   }
   
+  // Trata formato brasileiro (DD/MM/YYYY) vindo da Coluna C
   if (dateStr.includes('/')) {
     const parts = dateStr.split(' ')[0].split('/');
     if (parts.length === 3) {
@@ -127,7 +130,8 @@ export const getDailyStats = async (dataISO: string): Promise<DailyStats> => {
     gols2: Number(m.gols2) || 0
   })).filter((m: any) => m.dataISO === dataISO);
 
-  const dailyPlays = plays.filter((p: any) => parseToIso(p["Data do Jogo"] || p["Data"]) === dataISO);
+  // CRÍTICO: Filtra usando estritamente a chave "Data do Jogo" (Coluna C da Planilha)
+  const dailyPlays = plays.filter((p: any) => parseToIso(p["Data do Jogo"]) === dataISO);
   
   const statsJogadores = Array.from(new Set(dailyPlays.map((p: any) => p["Jogador"]))).map(nome => {
     const pPlays = dailyPlays.filter((p: any) => p["Jogador"] === nome);
@@ -164,14 +168,16 @@ export const getDailyStats = async (dataISO: string): Promise<DailyStats> => {
 
 export const getRawPlaysByDate = async (dataISO: string): Promise<any[]> => {
   const json = await fetchFullData(true);
-  return (json.plays || []).filter((p: any) => parseToIso(p["Data do Jogo"] || p["Data"]) === dataISO);
+  // CRÍTICO: Filtra usando estritamente a chave "Data do Jogo" (Coluna C da Planilha)
+  return (json.plays || []).filter((p: any) => parseToIso(p["Data do Jogo"]) === dataISO);
 };
 
 export const getDashboardData = async (filters: { ano?: number; jogador?: string }): Promise<DashboardData> => {
   const json = await fetchFullData();
   const plays = json.plays || [];
   const filtered = plays.filter((p: any) => {
-    const date = parseToIso(p["Data do Jogo"] || p["Data"]);
+    // CRÍTICO: Busca data da Coluna C
+    const date = parseToIso(p["Data do Jogo"]);
     return filters.ano ? new Date(date).getUTCFullYear() === filters.ano : true;
   });
   
