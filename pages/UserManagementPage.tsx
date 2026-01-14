@@ -4,20 +4,22 @@ import { getUsuariosPlanilha, saveUsuarioPlanilha, deleteUsuarioPlanilha } from 
 import { User, Routine, ToastType } from '../types';
 import { Users, UserPlus, Trash2, Edit3, Shield, Check, X, ShieldAlert, Key, RefreshCw, Info } from 'lucide-react';
 
-interface UserManagementPageProps {
-  onToast: (text: string, type: ToastType) => void;
-}
-
 const ROUTINES_LIST: { id: Routine; label: string }[] = [
   { id: 'checkin', label: 'Check-in Atletas' },
   { id: 'escalacao', label: 'Painel Escalação' },
   { id: 'jogadas', label: 'Lançar Jogadas' },
   { id: 'partidas', label: 'Lançar Partidas' },
   { id: 'resultados', label: 'Ver Resultados' },
+  { id: 'scout_anual', label: 'Scout Anual' },
   { id: 'dashboard', label: 'Dashboard Anual' },
   { id: 'usuarios', label: 'Gestão de Acessos' },
   { id: 'ajuda', label: 'Ajuda e Guia' }
 ];
+
+// Definition of props for the UserManagementPage component to fix the missing name error
+interface UserManagementPageProps {
+  onToast: (text: string, type: ToastType) => void;
+}
 
 const UserManagementPage: React.FC<UserManagementPageProps> = ({ onToast }) => {
   const [users, setUsers] = useState<User[]>([]);
@@ -119,7 +121,6 @@ const UserManagementPage: React.FC<UserManagementPageProps> = ({ onToast }) => {
 
   return (
     <div className="max-w-5xl mx-auto space-y-8 px-2">
-      {/* MINI EXPLICAÇÃO */}
       <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-start gap-3 shadow-sm">
         <Info className="w-5 h-5 text-slate-600 shrink-0 mt-0.5" />
         <p className="text-[10px] text-slate-800 font-black uppercase leading-relaxed tracking-tight">

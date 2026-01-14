@@ -10,7 +10,7 @@ const DEFAULT_ADMIN: User = {
   username: 'admin',
   password: 'pfc',
   isAdmin: true,
-  routines: ['checkin', 'escalacao', 'jogadas', 'partidas', 'resultados', 'dashboard', 'usuarios']
+  routines: ['checkin', 'escalacao', 'jogadas', 'partidas', 'resultados', 'scout_anual', 'dashboard', 'usuarios', 'ajuda']
 };
 
 /**
