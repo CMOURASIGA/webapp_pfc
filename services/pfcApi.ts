@@ -1,5 +1,5 @@
 
-import { DailyStats, DashboardData, Match, PlayerPlay, User } from '../types';
+import { DailyStats, DashboardData, Match, PlayerPlay, User, RankingItem } from '../types';
 
 // Tenta obter a URL da variável de ambiente, senão usa o fallback
 const API_URL = (import.meta as any).env?.VITE_API_URL || 'https://script.google.com/macros/s/AKfycbzA71iQleRONyYz9RmosQe0S4XkoBzhu55I8wmFW53eIm8jMeHX8051_FY8ujL4A19W/exec'; 
@@ -169,26 +169,22 @@ export const getDashboardData = async (filters: { ano?: number; jogador?: string
   const plays = json.plays || [];
   const assignments = json.teamAssignments || [];
   
-  // 1. Filtrar participações da aba 'times' pelo ano (fonte confiável de presença)
   const filteredAssignments = assignments.filter((a: any) => {
     const date = parseToIso(a.data);
     return filters.ano ? new Date(date).getUTCFullYear() === filters.ano : true;
   });
 
-  // Mapa de presenças: Nome -> Quantidade de Datas Escaladas
   const presenceMap: Record<string, number> = {};
   filteredAssignments.forEach((a: any) => {
     const nome = a.nome?.toString().toUpperCase().trim();
     if (nome) presenceMap[nome] = (presenceMap[nome] || 0) + 1;
   });
 
-  // 2. Filtrar jogadas pelo ano para Gols e Assistências
   const filteredPlays = plays.filter((p: any) => {
     const date = parseToIso(p["Data do Jogo"]);
     return filters.ano ? new Date(date).getUTCFullYear() === filters.ano : true;
   });
   
-  // Obter lista única de todos os jogadores que tiveram presença OU jogada no ano
   const allNames = Array.from(new Set([
     ...Object.keys(presenceMap),
     ...filteredPlays.map((p: any) => p["Jogador"]?.toString().toUpperCase().trim())
@@ -212,13 +208,14 @@ export const getDashboardData = async (filters: { ano?: number; jogador?: string
     };
   });
 
-  // Se houver um filtro de jogador específico, poderíamos filtrar aqui, 
-  // mas o dashboard geralmente exibe rankings comparativos.
-
   return {
     rankingGols: [...stats].sort((a,b) => b.gols - a.gols).slice(0, 10).map(s => ({ name: s.jogador, value: s.gols })),
     rankingAssist: [...stats].sort((a,b) => b.assist - a.assist).slice(0, 10).map(s => ({ name: s.jogador, value: s.assist })),
-    rankingGolsAssist: [...stats].sort((a,b) => b.totalGA - a.totalGA).slice(0, 10).map(s => ({ name: s.jogador, value: s.totalGA })),
+    rankingGolsAssist: [...stats].sort((a,b) => b.totalGA - a.totalGA).slice(0, 10).map(s => ({ 
+      name: s.jogador, 
+      value: s.totalGA,
+      displayValue: `${s.gols} Gols / ${s.assist} Ast`
+    })),
     presencaGols: [...stats].sort((a,b) => b.gRatio - a.gRatio).slice(0, 5).map(s => ({ jogador: s.jogador, presencas: s.presencas, gols: s.gols, ratio: Number(s.gRatio.toFixed(2)) })),
     presencaAssist: [...stats].sort((a,b) => b.aRatio - a.aRatio).slice(0, 5).map(s => ({ jogador: s.jogador, presencas: s.presencas, assistencias: s.assist, ratio: Number(s.aRatio.toFixed(2)) })),
     nivelPresenca: [...stats].sort((a,b) => b.presencas - a.presencas).slice(0, 5).map(s => ({ jogador: s.jogador, presencas: s.presencas })),

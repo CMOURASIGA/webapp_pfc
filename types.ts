@@ -44,6 +44,7 @@ export interface DailyStats {
 export interface RankingItem {
   name: string;
   value: number;
+  displayValue?: string;
 }
 
 export interface DashboardData {

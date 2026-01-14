@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { getDashboardData, getJogadores } from '../services/pfcApi';
-import { DashboardData } from '../types';
+import { DashboardData, RankingItem } from '../types';
 import { DASHBOARD_YEARS } from '../constants';
 import LoadingSpinner from '../components/feedback/LoadingSpinner';
 import RankingTable from '../components/stats/RankingTable';
@@ -52,13 +52,14 @@ const DashboardPage: React.FC = () => {
     const topArtilheiro = data.rankingGols[0]?.name || "N/A";
     const topGarcom = data.rankingAssist[0]?.name || "N/A";
     const topElite = data.rankingGolsAssist[0]?.name || "N/A";
+    const detailElite = data.rankingGolsAssist[0]?.displayValue || "";
 
     const text = `*📊 PELADA PFC - RESUMO DA TEMPORADA ${filters.ano}*
 
 🏆 *Líderes de Elite:*
 ⚽ *Artilheiro:* ${topArtilheiro} (${data.rankingGols[0]?.value || 0} gols)
 🅰️ *Garçom:* ${topGarcom} (${data.rankingAssist[0]?.value || 0} assistências)
-🔥 *Multifuncional (G+A):* ${topElite} (${data.rankingGolsAssist[0]?.value || 0} participações)
+🔥 *Multifuncional:* ${topElite} (${detailElite})
 
 Confira o ranking completo no nosso Dashboard Pro:
 ${window.location.origin}${window.location.pathname}#/dashboard`;
@@ -67,7 +68,7 @@ ${window.location.origin}${window.location.pathname}#/dashboard`;
     window.open(`https://wa.me/?text=${encodedText}`, '_blank');
   };
 
-  const Podium = ({ title, data, colorClass, description }: { title: string, data: any[], colorClass: string, description: string }) => {
+  const Podium = ({ title, data, colorClass, description }: { title: string, data: RankingItem[], colorClass: string, description: string }) => {
     if (!data || data.length < 1) return null;
     const top1 = data[0];
     const top2 = data[1];
@@ -84,12 +85,14 @@ ${window.location.origin}${window.location.pathname}#/dashboard`;
               <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center font-black text-gray-400 border-2 border-white shadow-md mb-2 group-hover:scale-110 transition-transform">
                 {top2.name.charAt(0)}
               </div>
-              <div className="w-full bg-gray-200 rounded-t-2xl flex flex-col items-center py-4 px-1 h-24 shadow-inner">
+              <div className="w-full bg-gray-200 rounded-t-2xl flex flex-col items-center py-4 px-1 h-28 shadow-inner">
                 <span className="text-[9px] font-black text-gray-500 uppercase mb-1">2º</span>
                 <span className="text-[9px] sm:text-[10px] font-black text-gray-900 break-words w-full text-center leading-[1.1] uppercase mb-1">
                   {top2.name}
                 </span>
-                <span className="text-xs font-black text-gray-600 mt-auto">{top2.value}</span>
+                <span className="text-[10px] font-black text-gray-600 mt-auto text-center px-1">
+                  {top2.displayValue || top2.value}
+                </span>
               </div>
             </div>
           )}
@@ -100,12 +103,14 @@ ${window.location.origin}${window.location.pathname}#/dashboard`;
               <Crown className="absolute -top-6 w-8 h-8 text-yellow-400 fill-yellow-400 drop-shadow-md animate-bounce" />
               <span className="text-2xl">{top1.name.charAt(0)}</span>
             </div>
-            <div className={`${colorClass} w-full rounded-t-3xl flex flex-col items-center py-6 px-1 h-40 shadow-xl relative`}>
-              <span className="text-[10px] font-black text-white/50 uppercase mb-1 tracking-widest">LÍDER</span>
+            <div className={`${colorClass} w-full rounded-t-3xl flex flex-col items-center py-6 px-1 h-44 shadow-xl relative`}>
+              <span className="text-[10px] font-black text-white/50 uppercase mb-1 tracking-widest text-center">LÍDER ABSOLUTO</span>
               <span className="text-[10px] sm:text-xs font-black text-white break-words w-full text-center leading-[1.1] uppercase mb-2">
                 {top1.name}
               </span>
-              <span className="text-2xl font-black text-white mt-auto">{top1.value}</span>
+              <span className={`font-black text-white mt-auto text-center px-2 mb-1 ${top1.displayValue ? 'text-sm' : 'text-2xl'}`}>
+                {top1.displayValue || top1.value}
+              </span>
             </div>
           </div>
 
@@ -115,12 +120,14 @@ ${window.location.origin}${window.location.pathname}#/dashboard`;
               <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center font-black text-gray-400 border-2 border-white shadow-md mb-2 group-hover:scale-110 transition-transform">
                 {top3.name.charAt(0)}
               </div>
-              <div className="w-full bg-gray-100 rounded-t-2xl flex flex-col items-center py-4 px-1 h-20 shadow-inner">
+              <div className="w-full bg-gray-100 rounded-t-2xl flex flex-col items-center py-4 px-1 h-24 shadow-inner">
                 <span className="text-[9px] font-black text-gray-400 uppercase mb-1">3º</span>
                 <span className="text-[9px] sm:text-[10px] font-black text-gray-900 break-words w-full text-center leading-[1.1] uppercase mb-1">
                   {top3.name}
                 </span>
-                <span className="text-xs font-black text-gray-600 mt-auto">{top3.value}</span>
+                <span className="text-[10px] font-black text-gray-600 mt-auto text-center px-1">
+                  {top3.displayValue || top3.value}
+                </span>
               </div>
             </div>
           )}
@@ -128,7 +135,7 @@ ${window.location.origin}${window.location.pathname}#/dashboard`;
 
         <div className="mt-4 pt-4 border-t border-gray-50 w-full flex items-start gap-2">
            <HelpCircle className="w-3.5 h-3.5 text-gray-300 shrink-0 mt-0.5" />
-           <p className="text-[8px] font-bold text-gray-400 uppercase leading-tight tracking-tight">
+           <p className="text-[8px] font-bold text-gray-400 uppercase leading-tight tracking-tight text-center w-full">
              {description}
            </p>
         </div>
@@ -154,7 +161,7 @@ ${window.location.origin}${window.location.pathname}#/dashboard`;
           <div className="space-y-4">
             <div className="inline-flex items-center gap-2 bg-blue-500/20 px-4 py-1.5 rounded-full border border-blue-400/30 backdrop-blur-md">
               <Activity className="w-4 h-4 text-blue-400" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-blue-300">Analytics Pro v4.0</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-blue-300">Analytics Pro v4.1</span>
             </div>
             <h1 className="text-5xl lg:text-7xl font-black tracking-tighter uppercase leading-[0.9]">
               Painel de <br /> <span className="text-blue-400">Resultados</span>
@@ -238,7 +245,7 @@ ${window.location.origin}${window.location.pathname}#/dashboard`;
                 title="Elite Multifuncional" 
                 data={data.rankingGolsAssist} 
                 colorClass="bg-emerald-500" 
-                description="Ranking de Contribuição Total (Gols + Assistências). Identifica o jogador mais influente na criação e finalização de jogadas."
+                description="Ranking de Contribuição Total detalhado (Gols + Assistências). Identifica quem é mais eficiente criando e finalizando."
               />
             </div>
           </section>
