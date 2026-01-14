@@ -32,7 +32,7 @@ function doPost(e) {
     const sheetUsers = ss.getSheetByName('usuario');
     const tz = ss.getSpreadsheetTimeZone();
 
-    // --- AÇÕES DE USUÁRIO E ESCALAÇÃO (MANTIDAS) ---
+    // --- AÇÕES DE USUÁRIO E ESCALAÇÃO ---
     if (action === 'saveUser') {
       if (!sheetUsers) throw new Error("Aba 'usuario' não encontrada.");
       const values = sheetUsers.getDataRange().getValues();
@@ -92,19 +92,17 @@ function doPost(e) {
     // --- LANÇAMENTO DE SCOUTS (RESPOSTAS AO FORMULÁRIO 1) ---
     if (action === 'registerPlay' || action === 'editPlay') {
       const sheetPlays = ss.getSheetByName('Respostas ao formulário 1');
-      // Mapeamento exato seguindo a imagem da planilha:
-      // A: Carimbo | B: Jogador | C: Data do Jogo | D: Presença | E: Assistência | F: Gols | G: Última Datas | P: Time | O: Capitão
       const rowData = [
-        new Date(),                              // A: Carimbo de data/hora
-        data.jogador,                            // B: Jogador
-        data.dataISO.split('-').reverse().join('/'), // C: Data do Jogo
-        'Presente',                              // D: Presença
-        data.assist || 0,                        // E: Assistência
-        data.gols || 0,                          // F: Gols
-        'Última',                                // G: Última Datas
-        '', '', '', '', '', '', '',              // H a N (Vazias ou auxiliares)
-        data.capitao ? 'Sim' : 'Não',            // O: Capitão (Vencedor)
-        data.time                                // P: Time
+        new Date(),                                  // A: Carimbo
+        data.jogador,                                // B: Jogador
+        data.dataISO.split('-').reverse().join('/'), // C: Data do Jogo (A QUE VOCÊ PEDIU)
+        'Presente',                                  // D: Presença
+        data.assist || 0,                            // E: Assistência
+        data.gols || 0,                              // F: Gols
+        'Última',                                    // G: Última Datas
+        '', '', '', '', '', '', '',                  // H a N
+        data.capitao ? 'Sim' : 'Não',                // O: Capitão
+        data.time                                    // P: Time
       ];
       if (action === 'editPlay' && data.rowIndex) {
         sheetPlays.getRange(data.rowIndex, 1, 1, rowData.length).setValues([rowData]);
@@ -120,9 +118,21 @@ function doPost(e) {
       return createJsonResponse({ success: true });
     }
 
+    // --- LANÇAMENTO DE PLACAR (JOGOS_2025) ---
     if (action === 'registerMatch') {
-      const sheet = ss.getSheetByName('Jogos_2025');
-      if (sheet) sheet.appendRow([data.dataISO.split('-').reverse().join('/'), data.time1, data.gols1, data.time2, data.gols2]);
+      const sheetMatches = ss.getSheetByName('Jogos_2025');
+      if (sheetMatches) {
+        // GARANTIA: Coluna A recebe a data convertida de YYYY-MM-DD para DD/MM/YYYY
+        const dataFormatada = data.dataISO.split('-').reverse().join('/');
+        const rowData = [
+          dataFormatada, // A: Data
+          data.time1,    // B: Time 1
+          data.gols1,    // C: Gols T1
+          data.time2,    // D: Time 2
+          data.gols2     // E: Gols T2
+        ];
+        sheetMatches.appendRow(rowData);
+      }
       return createJsonResponse({ success: true });
     }
 
@@ -132,37 +142,50 @@ function doPost(e) {
   }
 }
 
-/**
- * Função GetPlays Otimizada
- * Mapeia os cabeçalhos e garante que datas sejam enviadas como strings formatadas.
- */
+// --- FUNÇÕES DE LEITURA OTIMIZADAS ---
+
+function getMatches(ss) {
+  const sheet = ss.getSheetByName('Jogos_2025');
+  if (!sheet) return [];
+  const tz = ss.getSpreadsheetTimeZone();
+  const vals = sheet.getDataRange().getValues();
+  if (vals.length < 2) return [];
+  
+  return vals.slice(1)
+    .filter(row => row[0]) // Filtra se tiver data na Coluna A
+    .map(row => {
+      let d = row[0];
+      // Garante que o frontend receba a data como string formatada da Coluna A
+      let dStr = d instanceof Date ? Utilities.formatDate(d, tz, "dd/MM/yyyy") : d.toString().trim();
+      return { 
+        data: dStr,     // Coluna A
+        time1: row[1],  // Coluna B
+        gols1: row[2],  // Coluna C
+        time2: row[3],  // Coluna D
+        gols2: row[4]   // Coluna E
+      };
+    });
+}
+
 function getPlays(ss) {
   const sheet = ss.getSheetByName('Respostas ao formulário 1');
   if (!sheet) return [];
   const tz = ss.getSpreadsheetTimeZone();
   const vals = sheet.getDataRange().getValues();
   if (vals.length < 2) return [];
-
   const headers = vals[0].map(h => h.toString().trim());
-  
   return vals.slice(1)
-    .filter(row => row[1]) // Garante que tem nome de jogador
+    .filter(row => row[1]) 
     .map((row, idx) => {
       let play = { rowIndex: idx + 2 };
       headers.forEach((h, i) => {
         let val = row[i];
-        // Se for uma data (especialmente na Coluna C), formata para evitar erros de fuso horário no JSON
-        if (val instanceof Date) {
-          play[h] = Utilities.formatDate(val, tz, "dd/MM/yyyy");
-        } else {
-          play[h] = val;
-        }
+        if (val instanceof Date) { play[h] = Utilities.formatDate(val, tz, "dd/MM/yyyy"); } 
+        else { play[h] = val; }
       });
       return play;
     });
 }
-
-// --- FUNÇÕES AUXILIARES (MANTIDAS) ---
 
 function getPlayers(ss) {
   const sheet = ss.getSheetByName('JOGADORES');
@@ -181,15 +204,6 @@ function getTeamAssignments(ss) {
       let dStr = d instanceof Date ? Utilities.formatDate(d, tz, "dd/MM/yyyy") : d.toString().trim();
       return { rowIndex: i + 2, time: row[0], nome: row[1], data: dStr, chegou: row[3] === 'Sim' };
     });
-}
-
-function getMatches(ss) {
-  const sheet = ss.getSheetByName('Jogos_2025');
-  if (!sheet) return [];
-  const vals = sheet.getDataRange().getValues();
-  return vals.slice(1)
-    .filter(row => row[0])
-    .map(row => ({ data: row[0], time1: row[1], gols1: row[2], time2: row[3], gols2: row[4] }));
 }
 
 function getUsers(ss) {

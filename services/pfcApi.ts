@@ -2,7 +2,7 @@
 import { DailyStats, DashboardData, Match, PlayerPlay, User } from '../types';
 
 // Tenta obter a URL da variável de ambiente, senão usa o fallback
-const API_URL = (import.meta as any).env?.VITE_API_URL || 'https://script.google.com/macros/s/AKfycbyREKLkLQLFA871c24j-N_gYd0XgVo7kW2J6CbPYWEMHQcwQOQQteg9Vw4DCxJHd25f/exec'; 
+const API_URL = (import.meta as any).env?.VITE_API_URL || 'https://script.google.com/macros/s/AKfycbzA71iQleRONyYz9RmosQe0S4XkoBzhu55I8wmFW53eIm8jMeHX8051_FY8ujL4A19W/exec'; 
 
 let cachedInitialData: any = null;
 let lastFetchTime = 0;
